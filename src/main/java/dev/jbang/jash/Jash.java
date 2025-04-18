@@ -204,8 +204,8 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code Jash} with a set of allowed exit code values that
-	 * will be considered as successful exit codes for the command.
+	 * Return a {@code Jash} with a set of allowed exit code values that will be
+	 * considered as successful exit codes for the command.
 	 * <p>
 	 * Warning: overrides the default value that considers 0 as a successful exit
 	 * code.
@@ -216,8 +216,8 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code Jash} adding specified allowed exit codes that will
-	 * be considered as successful exit codes for the command.
+	 * Return a {@code Jash} adding specified allowed exit codes that will be
+	 * considered as successful exit codes for the command.
 	 */
 	public Jash withAllowedExitCodes(int... exitCodes) {
 		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
@@ -228,8 +228,8 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code Jash} adding an allowed exit code that will be
-	 * considered a successful exit code for the command.
+	 * Return a {@code Jash} adding an allowed exit code that will be considered a
+	 * successful exit code for the command.
 	 */
 	public Jash withAllowedExitCode(int exitCode) {
 		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
@@ -263,8 +263,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code Jash} that throw exception only when beyond the last
-	 * element.
+	 * Return a {@code Jash} that throw exception only when beyond the last element.
 	 * <p>
 	 * This is the default.
 	 * </p>

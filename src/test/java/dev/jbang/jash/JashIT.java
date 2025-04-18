@@ -27,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,24 +38,24 @@ public class JashIT {
 
 	@Test
 	public void test() throws Exception {
-		assertThat(Jash.start("sh", "-c", "echo hello; echo world")
-					.stream())
-			.containsExactly("hello", "world");
+		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
+						.stream())
+									.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testShell() throws Exception {
-		assertThat(Jash.shell("echo hello; echo world")
-					.stream())
-			.containsExactly("hello", "world");
+		assertThat(Jash	.shell("echo hello; echo world")
+						.stream())
+									.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testShellPipe() throws Exception {
-		assertThat(Jash.$("echo hello; echo world")
-					.pipe$("cat")
-					.stream())
-			.containsExactly("hello", "world");
+		assertThat(Jash	.$("echo hello; echo world")
+						.pipe$("cat")
+						.stream())
+									.containsExactly("hello", "world");
 	}
 
 	@Test
@@ -67,21 +66,21 @@ public class JashIT {
 					.start()
 					.pipe$("cat")
 					.stream())
-			.containsExactly("hello", "world");
+								.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testSuccessful() throws Exception {
-		assertThat(Jash.start("sh", "-c", "echo hello world")
+		assertThat(Jash	.start("sh", "-c", "echo hello world")
 						.isSuccessful())
-			.isTrue();
+										.isTrue();
 	}
 
 	@Test
 	public void testUnsuccessful() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "[ -z 'hello world' ]")
 						.isSuccessful())
-			.isFalse();
+										.isFalse();
 	}
 
 	@Test
@@ -92,38 +91,38 @@ public class JashIT {
 
 	@Test
 	public void testPipe() throws Exception {
-		assertThat(Jash.start("sh", "-c", "echo hello; echo world")
-					.pipe("cat")
-					.stream())
-			.containsExactly("hello", "world");
+		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
+						.pipe("cat")
+						.stream())
+									.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testPipeWithLines() throws Exception {
-		assertThat(Jash.start("sh", "-c", "echo hello world")
-					.pipe("cat")
-					.get())
-			.isEqualTo("hello world");
+		assertThat(Jash	.start("sh", "-c", "echo hello world")
+						.pipe("cat")
+						.get())
+								.isEqualTo("hello world");
 	}
 
 	@Test
 	public void testEnvironment() throws Exception {
-		assertThat(Jash.builder("env")
-					.clearEnvironment()
-					.environment("A", "1")
-					.environment("B", "2")
-					.start()
-					.get())
-			.isEqualTo("A=1\nB=2");
+		assertThat(Jash	.builder("env")
+						.clearEnvironment()
+						.environment("A", "1")
+						.environment("B", "2")
+						.start()
+						.get())
+								.isEqualTo("A=1\nB=2");
 	}
 
 	@Test
 	public void testInput() throws Exception {
 		try (Stream<String> inputStream = Stream.of("hello world")) {
-			assertThat(Jash.start("cat")
-					.inputStream(inputStream)
-					.get())
-			.isEqualTo("hello world");
+			assertThat(Jash	.start("cat")
+							.inputStream(inputStream)
+							.get())
+									.isEqualTo("hello world");
 		}
 	}
 
@@ -133,12 +132,12 @@ public class JashIT {
 		Jash.start("sh", "-c", "echo hello world")
 			.writeToOutputStream(outputStream);
 		assertThat(new String(outputStream.toByteArray(), StandardCharsets.UTF_8))
-			.isEqualTo("hello world\n");
+																					.isEqualTo("hello world\n");
 	}
 
 	@Test
 	public void testError() throws Exception {
-		
+
 		Assertions.assertThrows(ProcessException.class,
 				() -> Jash	.start("sh", "-c", "exit 1")
 							.get());
@@ -151,7 +150,7 @@ public class JashIT {
 									.start()
 									.stream();
 		assertThat(output.collect(Collectors.joining()))
-			.isEqualTo("sh: 79: command not found");
+														.isEqualTo("sh: 79: command not found");
 
 		ProcessException ex = catchThrowableOfType(() -> {
 			output.close();
@@ -161,7 +160,7 @@ public class JashIT {
 		assertThat(ex).hasMessage("Command 'sh -c 79' exited with code 127");
 		assertThat(ex.getExitCode()).isEqualTo(127);
 		assertThat(ex.getArgs())
-			.containsExactly("sh", "-c", "79");
+								.containsExactly("sh", "-c", "79");
 	}
 
 	@Test
@@ -169,9 +168,9 @@ public class JashIT {
 		Output output = Jash.start("sh", "-c", "echo hello world")
 							.tryGet();
 		assertThat(output.output().get())
-			.isEqualTo("hello world");
+											.isEqualTo("hello world");
 		assertThat(output.exception().isPresent())
-			.isFalse();
+													.isFalse();
 	}
 
 	@Test
@@ -179,16 +178,16 @@ public class JashIT {
 		Output output = Jash.start("sh", "-c", "echo hello world; 79")
 							.tryGet();
 		assertThat(output.output().isPresent())
-			.isFalse();
+												.isFalse();
 		assertThat(output.exception().get() instanceof ProcessException)
-			.isTrue();
+																		.isTrue();
 		ProcessException ex = (ProcessException) output.exception().get();
 		assertThat(ex.getMessage())
-			.isEqualTo("Command 'sh -c echo hello world; 79' exited with code 127");
+									.isEqualTo("Command 'sh -c echo hello world; 79' exited with code 127");
 		assertThat(ex.getExitCode())
-			.isEqualTo(127);
+									.isEqualTo(127);
 		assertThat(ex.getArgs())
-			.containsExactly("sh", "-c", "echo hello world; 79");
+								.containsExactly("sh", "-c", "echo hello world; 79");
 	}
 
 	@Test
@@ -235,11 +234,11 @@ public class JashIT {
 
 	@Test
 	public void testStream() throws Exception {
-		assertThat(Jash.start("sh", "-c", "echo hello world")
-					.stream()
-					.peek(line -> assertThat(line).isEqualTo("hello world"))
-					.count())
-			.isEqualTo(1);
+		assertThat(Jash	.start("sh", "-c", "echo hello world")
+						.stream()
+						.peek(line -> assertThat(line).isEqualTo("hello world"))
+						.count())
+									.isEqualTo(1);
 	}
 
 	@Test

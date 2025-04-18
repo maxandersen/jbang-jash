@@ -21,19 +21,15 @@
 package dev.jbang.jash;
 
 import static dev.jbang.jash.Jash.$;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.presentation.Representation;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ReadMeIT {
 
@@ -42,37 +38,49 @@ public class ReadMeIT {
 	 */
 	@Test
 	public void testHelloWorld() {
-		assertThat(Jash.start
-		("sh", 
-		"-c", 
-		"echo hello; echo world")
-		.stream())
-		.containsExactly("hello", "world");
+		assertThat(Jash	.start("sh",
+								"-c",
+								"echo hello; echo world")
+						.stream())
+									.containsExactly("hello", "world");
 	}
 
 	public static String escapeJavaString(String str) {
 		StringBuilder sb = new StringBuilder();
 		for (char c : str.toCharArray()) {
 			switch (c) {
-				case '\b': sb.append("\\b"); break;
-				case '\t': sb.append("\\t"); break;
-				case '\n': sb.append("\\n"); break;
-				case '\f': sb.append("\\f"); break;
-				case '\r': sb.append("\\r"); break;
-				case '\"': sb.append("\\\""); break;
-				case '\\': sb.append("\\\\"); break;
-				default:
-					if (c < 32 || c > 126) {
-						sb.append(String.format("\\u%04x", (int) c));
-					} else {
-						sb.append(c);
-					}
+			case '\b':
+				sb.append("\\b");
+				break;
+			case '\t':
+				sb.append("\\t");
+				break;
+			case '\n':
+				sb.append("\\n");
+				break;
+			case '\f':
+				sb.append("\\f");
+				break;
+			case '\r':
+				sb.append("\\r");
+				break;
+			case '\"':
+				sb.append("\\\"");
+				break;
+			case '\\':
+				sb.append("\\\\");
+				break;
+			default:
+				if (c < 32 || c > 126) {
+					sb.append(String.format("\\u%04x", (int) c));
+				} else {
+					sb.append(c);
+				}
 			}
 		}
 		return sb.toString();
 	}
-	
-	
+
 	/**
 	 * Same as above but using a shell-style call:
 	 */
@@ -80,9 +88,9 @@ public class ReadMeIT {
 	public void testHelloWorld$() {
 
 		assertThat(
-			$("echo hello; echo world")
-			.stream())
-		.containsExactly("hello", "world");
+				$("echo hello; echo world")
+											.stream())
+														.containsExactly("hello", "world");
 	}
 
 	/**
@@ -93,63 +101,66 @@ public class ReadMeIT {
 		Assertions.registerFormatterForType(String.class, value -> escapeJavaString(value));
 
 		assertThat(
-			$("echo hello; echo world").pipe("cat", "-n")
-			.stream())
-			.containsExactly("     1\thello", "     2\tworld");
+				$("echo hello; echo world")	.pipe("cat", "-n")
+											.stream())
+														.containsExactly("     1\thello", "     2\tworld");
 	}
 
 	/**
-	 * This will print "hello" followed by "world" but will fail when terminating the Java Stream:
+	 * This will print "hello" followed by "world" but will fail when terminating
+	 * the Java Stream:
 	 */
 	@Test
 	public void testHelloWorldStartStream() {
 		assertThatThrownBy(() -> {
 			Jash.start(
-	"sh",
-	"-c",
-			"echo hello; echo world; exit 79")
-		.stream()
-		.peek(System.out::println)
-		.count();
+					"sh",
+					"-c",
+					"echo hello; echo world; exit 79")
+				.stream()
+				.peek(System.out::println)
+				.count();
 		}).isInstanceOf(ProcessException.class);
 	}
 
 	/**
-	 * Same output as the above but will fail when leaving the `try` block because the process exited with a non-zero exit code:
+	 * Same output as the above but will fail when leaving the `try` block because
+	 * the process exited with a non-zero exit code:
 	 */
 	@Test
 	public void testHelloWorldStartStreamWithoutCloseAfterLast() {
 		assertThatThrownBy(() -> {
-			try (Stream<String> stream = Jash.start(
-				"sh",
-				"-c",
-				"echo hello; echo world; exit 79")
-					.withoutCloseAfterLast()
-					.stream()) {
+			try (Stream<String> stream = Jash	.start(
+														"sh",
+														"-c",
+														"echo hello; echo world; exit 79")
+												.withoutCloseAfterLast()
+												.stream()) {
 				stream
-					.peek(System.out::println)
-					.count();
+						.peek(System.out::println)
+						.count();
 			}
 		}).isInstanceOf(ProcessException.class);
 	}
 
 	/**
-	 * Same result as above but will not fail at all as the process exit code is allowed:
+	 * Same result as above but will not fail at all as the process exit code is
+	 * allowed:
 	 */
 	@Test
 	public void testHelloWorldStartStreamWithAllowedExitCode() {
 		assertThat(
-			$("echo hello; echo world; exit 79")
-		.withAllowedExitCode(79)
-		.stream()
-		.peek(System.out::println)
-			.count())
-			.isEqualTo(2);
+				$("echo hello; echo world; exit 79")
+													.withAllowedExitCode(79)
+													.stream()
+													.peek(System.out::println)
+													.count())
+																.isEqualTo(2);
 	}
-	
-	
+
 	/**
-	 * You can also specify a timeout that will result in a `ProcessTimeoutException` exception:
+	 * You can also specify a timeout that will result in a
+	 * `ProcessTimeoutException` exception:
 	 */
 	@Test
 	public void testHelloWorldStartStreamWithTimeout() {
@@ -160,5 +171,5 @@ public class ReadMeIT {
 				.count();
 		}).isInstanceOf(ProcessTimeoutException.class);
 	}
-	
+
 }
