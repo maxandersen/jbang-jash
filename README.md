@@ -10,11 +10,21 @@
 
 ## What is it?
 
+![Jash Logo](images/jash_logo.png)
+
+```java
+import static dev.jbang.jash.Jash.*;
+
+$("java -version").stream().forEach(System.out::println);
+```
+
 A Java library to provide a Process interface that is fluent, predictable and with a great developer experience.
 
 *fluent* - because it provides a fluent API to start and manage processes
+
 *predictable* - because it provides a predictable API to start and manage processes, incl. throwing an exception when the process exits with a non-zero/not-allowed exit code.
-*great developer experience* - because it provides a great developer experience to work with processes, incl. streaming process output to a logger or collecting it as a string or a list of strings.
+
+*great developer experience* - because it provides a great developer experience to work with processes, incl. streaming collecting it as a string or a list of strings.
 
 ## How to use it
 
