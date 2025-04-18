@@ -31,6 +31,9 @@ repositories {
 }
 
 java {
+	toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 	withJavadocJar()
 	withSourcesJar()
 }
@@ -86,6 +89,16 @@ spotless {
 
 test {
 	useJUnitPlatform()
+	
+	// Include IT tests
+	include '**/*IT.class'
+	include '**/*Test.class'
+	
+	// Add test logging
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
 
 	if (project.hasProperty('testDiagnostics')) {
 		// Memory diagnostics
@@ -187,3 +200,71 @@ publishing {
 jreleaser {
 	configFile = file('jreleaser.yml')
 }
+
+// Register test tasks for different Java versions
+def testJavaVersions = [11, 17, 21]
+testJavaVersions.each { version ->
+    tasks.register("testJava${version}", Test) {
+        group = 'verification'
+        description = "Runs the test suite using Java ${version}"
+        
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(version)
+        }
+        
+        // Copy all test configuration from the main test task
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+        
+        // Use JUnit 5
+       // useJUnitPlatform()
+        
+        // Include IT tests
+        include '**/*IT.class'
+        include '**/*Test.class'
+        
+        // Add test logging
+        testLogging {
+            events "failed"
+            //showStandardStreams = true
+        }
+        
+        // Inherit test diagnostics if enabled
+        if (project.hasProperty('testDiagnostics')) {
+            jvmArgs "-XX:+HeapDumpOnOutOfMemoryError"
+            jvmArgs "-XX:HeapDumpPath=build/heapdumps"
+            jvmArgs "-XX:MaxMetaspaceSize=256m"
+            jvmArgs "-verbose:gc"
+            jvmArgs "-XX:+PrintGCDetails"
+            jvmArgs "-Xloggc:build/gc.log"
+            jvmArgs "-XX:+HeapDumpBeforeFullGC"
+            jvmArgs "-XX:+HeapDumpAfterFullGC"
+            jvmArgs "-XX:StartFlightRecording=filename=build/flight.jfr,dumponexit=true,settings=profile"
+            jvmArgs "-XX:NativeMemoryTracking=detail"
+            jvmArgs "-XX:+ShowCodeDetailsInExceptionMessages"
+            jvmArgs "-XX:+ClassUnloading"
+            jvmArgs "-XX:+ClassUnloadingWithConcurrentMark"
+            
+            testLogging {
+                events "passed", "skipped", "failed", "standardOut", "standardError"
+                exceptionFormat "full"
+                showCauses true
+                showExceptions true
+                showStackTraces true
+            }
+        }
+        
+        // Configure the task to continue even if tests fail
+        ignoreFailures = true
+    }
+}
+
+// Create a task to run all test versions
+tasks.register('testAllJavaVersions') {
+    group = 'verification'
+    description = 'Runs tests on all supported Java versions'
+    dependsOn testJavaVersions.collect { "testJava${it}" }
+}
+
+// Make the default test task depend on testJava11
+test.dependsOn testJava11

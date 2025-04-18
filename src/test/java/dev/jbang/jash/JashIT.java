@@ -39,14 +39,14 @@ public class JashIT {
 	@Test
 	public void test() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
-						.stream())
+						.stream().collect(Collectors.toList()))
 									.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testShell() throws Exception {
 		assertThat(Jash	.shell("echo hello; echo world")
-						.stream())
+						.stream().collect(Collectors.toList()))
 									.containsExactly("hello", "world");
 	}
 
@@ -54,7 +54,7 @@ public class JashIT {
 	public void testShellPipe() throws Exception {
 		assertThat(Jash	.$("echo hello; echo world")
 						.pipe$("cat")
-						.stream())
+						.stream().collect(Collectors.toList()))
 									.containsExactly("hello", "world");
 	}
 
@@ -65,7 +65,7 @@ public class JashIT {
 					.as$()
 					.start()
 					.pipe$("cat")
-					.stream())
+					.stream().collect(Collectors.toList()))
 								.containsExactly("hello", "world");
 	}
 
@@ -93,7 +93,7 @@ public class JashIT {
 	public void testPipe() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
 						.pipe("cat")
-						.stream())
+						.stream().collect(Collectors.toList()))
 									.containsExactly("hello", "world");
 	}
 
