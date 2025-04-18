@@ -55,7 +55,7 @@ versioner {
 
 dependencies {
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation "org.assertj:assertj-core:3.24.2"
 }
 
@@ -86,35 +86,35 @@ spotless {
 
 test {
 	useJUnitPlatform()
-	
+
 	if (project.hasProperty('testDiagnostics')) {
 		// Memory diagnostics
 		jvmArgs "-XX:+HeapDumpOnOutOfMemoryError"
 		jvmArgs "-XX:HeapDumpPath=build/heapdumps"
 		jvmArgs "-XX:MaxMetaspaceSize=256m"
-		
+
 		// GC logging
 		jvmArgs "-verbose:gc"
 		jvmArgs "-XX:+PrintGCDetails"
 		jvmArgs "-Xloggc:build/gc.log"
-		
+
 		// Thread dumps on OOM
 		jvmArgs "-XX:+HeapDumpBeforeFullGC"
 		jvmArgs "-XX:+HeapDumpAfterFullGC"
-		
+
 		// Enable flight recorder
 		jvmArgs "-XX:StartFlightRecording=filename=build/flight.jfr,dumponexit=true,settings=profile"
-		
+
 		// Enable native memory tracking
 		jvmArgs "-XX:NativeMemoryTracking=detail"
-		
+
 		// Enable more detailed error reporting
 		jvmArgs "-XX:+ShowCodeDetailsInExceptionMessages"
-		
+
 		// Enable class unloading
 		jvmArgs "-XX:+ClassUnloading"
 		jvmArgs "-XX:+ClassUnloadingWithConcurrentMark"
-		
+
 		// Add debug logging
 		testLogging {
 			events "passed", "skipped", "failed", "standardOut", "standardError"
@@ -123,7 +123,7 @@ test {
 			showExceptions true
 			showStackTraces true
 		}
-		
+
 		// Print diagnostic information
 		doFirst {
 			println "Running tests with diagnostic options:"

@@ -28,69 +28,69 @@ import java.util.Map;
 
 public class JdkProcess extends CustomProcess {
 
-  private final JdkProcessBuilder processBuilder;
-  private final Process process;
+	private final JdkProcessBuilder processBuilder;
+	private final Process process;
 
-  JdkProcess(JdkProcessBuilder processBuilder, Process process) {
-    this.processBuilder = processBuilder;
-    this.process = process;
-  }
+	JdkProcess(JdkProcessBuilder processBuilder, Process process) {
+		this.processBuilder = processBuilder;
+		this.process = process;
+	}
 
-  @Override
-  public List<String> command() {
-    return processBuilder.command();
-  }
+	@Override
+	public List<String> command() {
+		return processBuilder.command();
+	}
 
-  @Override
-  public Map<String, String> environment() {
-    return processBuilder.environment();
-  }
+	@Override
+	public Map<String, String> environment() {
+		return processBuilder.environment();
+	}
 
-  @Override
-  public Path directory() {
-    return processBuilder.directory();
-  }
+	@Override
+	public Path directory() {
+		return processBuilder.directory();
+	}
 
-  @Override
-  public OutputStream getOutputStream() {
-    return process.getOutputStream();
-  }
+	@Override
+	public OutputStream getOutputStream() {
+		return process.getOutputStream();
+	}
 
-  @Override
-  public InputStream getInputStream() {
-    return process.getInputStream();
-  }
+	@Override
+	public InputStream getInputStream() {
+		return process.getInputStream();
+	}
 
-  @Override
-  public InputStream getErrorStream() {
-    return process.getErrorStream();
-  }
+	@Override
+	public InputStream getErrorStream() {
+		return process.getErrorStream();
+	}
 
-  @Override
-  public int exitValue() {
-    return process.exitValue();
-  }
+	@Override
+	public int exitValue() {
+		return process.exitValue();
+	}
 
-  @Override
-  public Process destroyForcibly() {
-    return process.destroyForcibly();
-  }
+	@Override
+	public Process destroyForcibly() {
+		return process.destroyForcibly();
+	}
 
-  @Override
-  public int waitFor() throws InterruptedException {
-    return process.waitFor();
-  }
+	@Override
+	public int waitFor() throws InterruptedException {
+		return process.waitFor();
+	}
 
-  @Override
-  public boolean isAlive() {
-    return process.isAlive();
-  }
+	@Override
+	public boolean isAlive() {
+		return process.isAlive();
+	}
 
-  public static Process asProcess(FluentProcess process) {
-    if (process.getProcess() instanceof JdkProcess) {
-      return JdkProcess.class.cast(process.getProcess()).process;
-    }
-    throw new IllegalArgumentException(FluentProcess.class.getSimpleName() + " is using "
-        + process.getProcess().getClass().getSimpleName());
-  }
+	public static Process asProcess(FluentProcess process) {
+		if (process.getProcess() instanceof JdkProcess) {
+			return JdkProcess.class.cast(process.getProcess()).process;
+		}
+		throw new IllegalArgumentException(FluentProcess.class.getSimpleName() + " is using "
+				+ process.getProcess().getClass().getSimpleName());
+	}
 }

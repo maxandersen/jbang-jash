@@ -24,36 +24,36 @@ import java.nio.charset.StandardCharsets;
 
 public class OutputData {
 
-  private final Integer fd;
-  private final byte[] bytes;
+	private final Integer fd;
+	private final byte[] bytes;
 
-  OutputData(Integer fd, byte[] bytes) {
-    this.fd = fd;
-    this.bytes = bytes;
-  }
+	OutputData(Integer fd, byte[] bytes) {
+		this.fd = fd;
+		this.bytes = bytes;
+	}
 
-  public Integer fd() {
-    return fd;
-  }
+	public Integer fd() {
+		return fd;
+	}
 
-  public byte[] bytes() {
-    return bytes;
-  }
+	public byte[] bytes() {
+		return bytes;
+	}
 
-  public boolean isStdout() {
-    return fd == FluentProcess.STDOUT;
-  }
+	public boolean isStdout() {
+		return fd == FluentProcess.STDOUT;
+	}
 
-  public boolean isStderr() {
-    return fd == FluentProcess.STDERR;
-  }
+	public boolean isStderr() {
+		return fd == FluentProcess.STDERR;
+	}
 
-  @Override
-  public String toString() {
-    try {
-      return fd + ":" + new String(bytes, StandardCharsets.UTF_8);
-    } catch (Exception ex) {
-      return fd + ":" + ex.getMessage();
-    }
-  }
+	@Override
+	public String toString() {
+		try {
+			return fd + ":" + new String(bytes, StandardCharsets.UTF_8);
+		} catch (Exception ex) {
+			return fd + ":" + ex.getMessage();
+		}
+	}
 }

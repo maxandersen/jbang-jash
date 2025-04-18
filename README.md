@@ -19,56 +19,56 @@ Just use one of `FluentProcess.start(String command, String...args)` or `FluentP
 
 ```java
 FluentProcess.start(
-    "sh",
-    "-c",
-    "echo hello; echo world")
-        .stream()
+	"sh",
+	"-c",
+	"echo hello; echo world")
+		.stream()
 ```
 
 * Same result as above but pipelining with `cat`:
 
 ```java
 FluentProcess.start(
-    "sh",
-    "-c",
-    "echo hello; echo world")
-        .pipe("cat")
-        .stream()
+	"sh",
+	"-c",
+	"echo hello; echo world")
+		.pipe("cat")
+		.stream()
 ```
 
 * Same result as above but passing to `cat` a pure Java Stream:
 
 ```java
 FluentProcess.start("cat")
-        .inputStream(
-          Stream.of("hello", "world"))
-        .stream()
+		.inputStream(
+		Stream.of("hello", "world"))
+		.stream()
 ```
 
 * This will print "hello" followed by "world" but will fail when terminating the Java Stream:
 
 ```java
 FluentProcess.start(
-    "sh",
-    "-c",
-    "echo hello; echo world; exit 79")
-        .stream()
-        .peek(System.out::println)
-        .count() // <- exception will be thrown here
+	"sh",
+	"-c",
+	"echo hello; echo world; exit 79")
+		.stream()
+		.peek(System.out::println)
+		.count() // <- exception will be thrown here
 ```
 
 * Same output as the above but will fail when leaving the `try` block:
 
 ```java
 try (Stream<String> stream = FluentProcess.start(
-    "sh",
-    "-c",
-    "echo hello; echo world; exit 79")
-        .withoutCloseAfterLast()
-        .stream()) {
-    stream
-        .peek(System.out::println)
-        .count();
+	"sh",
+	"-c",
+	"echo hello; echo world; exit 79")
+		.withoutCloseAfterLast()
+		.stream()) {
+	stream
+		.peek(System.out::println)
+		.count();
 } // <- exception will be thrown here when Stream.close() will be called
 ```
 
@@ -76,25 +76,25 @@ try (Stream<String> stream = FluentProcess.start(
 
 ```java
 FluentProcess.start(
-    "sh",
-    "-c",
-    "echo hello; echo world; exit 79")
-        .withAllowedExitCode(79)
-        .stream()
-        .peek(System.out::println)
-        .count();
+	"sh",
+	"-c",
+	"echo hello; echo world; exit 79")
+		.withAllowedExitCode(79)
+		.stream()
+		.peek(System.out::println)
+		.count();
 ```
 
 * You can also specify a timeout that will result in a `ProcessTimeoutException` exception:
 
 ```java
 FluentProcess.start(
-    "sh",
-    "-c",
-    "sleep 3600")
-        .withTimeout(Duration.of(1, ChronoUnit.SECONDS))
-        .stream()
-        .count(); // <- will throw an ProcessTimeoutException exception
+	"sh",
+	"-c",
+	"sleep 3600")
+		.withTimeout(Duration.of(1, ChronoUnit.SECONDS))
+		.stream()
+		.count(); // <- will throw an ProcessTimeoutException exception
 ```
 
 ## How to build
@@ -109,7 +109,7 @@ mvn clean package
 
 ## Maven Profiles
 
-- Safer: Slower but safer profile used to look for errors before pushing to SCM 
+- Safer: Slower but safer profile used to look for errors before pushing to SCM
 
 ```
 mvn verify -P safer
@@ -118,7 +118,7 @@ mvn verify -P safer
 ### Integration tests
 
 The integration test suite requires a Unix compatible system is installed on the system and and
- some very common commands (sh, cat, env and sed). 
+some very common commands (sh, cat, env and sed).
 To launch the integrations tests run the following command:
 
 ```

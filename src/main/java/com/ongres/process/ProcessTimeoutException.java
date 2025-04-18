@@ -26,21 +26,21 @@ import java.util.stream.Collectors;
 
 public class ProcessTimeoutException extends ProcessException {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  private final Duration timeout;
+	private final Duration timeout;
 
-  public ProcessTimeoutException(Duration timeout, Collection<String> args) {
-    super(buildMessage(timeout, args), 1, args);
-    this.timeout = timeout;
-  }
+	public ProcessTimeoutException(Duration timeout, Collection<String> args) {
+		super(buildMessage(timeout, args), 1, args);
+		this.timeout = timeout;
+	}
 
-  private static String buildMessage(Duration timeout, Collection<String> args) {
-    return "Command " + args.stream().collect(Collectors.joining(" "))
-        + " timeout after " + timeout.toString();
-  }
+	private static String buildMessage(Duration timeout, Collection<String> args) {
+		return "Command " + args.stream().collect(Collectors.joining(" "))
+				+ " timeout after " + timeout.toString();
+	}
 
-  public Duration getTimeout() {
-    return timeout;
-  }
+	public Duration getTimeout() {
+		return timeout;
+	}
 }

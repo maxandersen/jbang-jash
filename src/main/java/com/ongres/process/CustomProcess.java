@@ -28,24 +28,24 @@ import java.util.Map;
 
 abstract class CustomProcess {
 
-  abstract List<String> command();
+	abstract List<String> command();
 
-  abstract Map<String, String> environment();
+	abstract Map<String, String> environment();
 
-  abstract Path directory();
+	abstract Path directory();
 
-  abstract OutputStream getOutputStream();
+	abstract OutputStream getOutputStream();
 
-  abstract InputStream getInputStream();
+	abstract InputStream getInputStream();
 
-  abstract InputStream getErrorStream();
+	abstract InputStream getErrorStream();
 
-  abstract int exitValue();
+	abstract int exitValue();
 
-  abstract Process destroyForcibly();
+	abstract Process destroyForcibly();
 
-  abstract int waitFor() throws InterruptedException;
+	abstract int waitFor() throws InterruptedException;
 
-  abstract boolean isAlive();
+	abstract boolean isAlive();
 
 }

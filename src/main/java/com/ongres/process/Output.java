@@ -23,27 +23,27 @@ package com.ongres.process;
 import java.util.Optional;
 
 public class Output {
-  private final Optional<String> output;
-  private final Optional<String> error;
-  private final Optional<Exception> exception;
+	private final Optional<String> output;
+	private final Optional<String> error;
+	private final Optional<Exception> exception;
 
-  Output(Optional<String> output, Optional<String> error,
-      Optional<Exception> exception) {
-    super();
-    this.output = output;
-    this.error = error;
-    this.exception = exception;
-  }
+	Output(Optional<String> output, Optional<String> error,
+			Optional<Exception> exception) {
+		super();
+		this.output = output;
+		this.error = error;
+		this.exception = exception;
+	}
 
-  public Optional<String> output() {
-    return output;
-  }
+	public Optional<String> output() {
+		return output;
+	}
 
-  public Optional<String> error() {
-    return error;
-  }
+	public Optional<String> error() {
+		return error;
+	}
 
-  public Optional<Exception> exception() {
-    return exception;
-  }
+	public Optional<Exception> exception() {
+		return exception;
+	}
 }

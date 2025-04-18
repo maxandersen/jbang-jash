@@ -25,33 +25,33 @@ import java.util.stream.Collectors;
 
 public class ProcessException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-  private final int exitCode;
-  private final Collection<String> args;
+	private final int exitCode;
+	private final Collection<String> args;
 
-  public ProcessException(int exitCode, Collection<String> args) {
-    super(buildMessage(exitCode, args));
-    this.exitCode = exitCode;
-    this.args = args;
-  }
+	public ProcessException(int exitCode, Collection<String> args) {
+		super(buildMessage(exitCode, args));
+		this.exitCode = exitCode;
+		this.args = args;
+	}
 
-  protected ProcessException(String message, int exitCode, Collection<String> args) {
-    super(message);
-    this.exitCode = exitCode;
-    this.args = args;
-  }
+	protected ProcessException(String message, int exitCode, Collection<String> args) {
+		super(message);
+		this.exitCode = exitCode;
+		this.args = args;
+	}
 
-  private static String buildMessage(int exitCode, Collection<String> args) {
-    return "Command " + args.stream().collect(Collectors.joining(" "))
-        + " exited with code " + exitCode;
-  }
+	private static String buildMessage(int exitCode, Collection<String> args) {
+		return "Command " + args.stream().collect(Collectors.joining(" "))
+				+ " exited with code " + exitCode;
+	}
 
-  public int getExitCode() {
-    return exitCode;
-  }
+	public int getExitCode() {
+		return exitCode;
+	}
 
-  public Collection<String> getArgs() {
-    return args;
-  }
+	public Collection<String> getArgs() {
+		return args;
+	}
 }

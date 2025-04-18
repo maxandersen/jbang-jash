@@ -31,130 +31,133 @@ import java.util.Optional;
 
 class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 
-  private final FluentProcess fluentProcess;
-  private final Map<Integer, InputStream> inputStreams;
-  private final boolean closeOnLast;
-  private OutputData frame = null;
+	private final FluentProcess fluentProcess;
+	private final Map<Integer, InputStream> inputStreams;
+	private final boolean closeOnLast;
+	private OutputData frame = null;
 
-  ProcessOutputDataIterator(FluentProcess fluentProcess,
-      boolean closeOnLast, Map<Integer, InputStream> inputStreams) {
-    this.fluentProcess = fluentProcess;
-    this.inputStreams = inputStreams;
-    inputStreams.entrySet().stream().map(Map.Entry::getValue)
-        .forEach(fluentProcess::registerCloseable);
-    this.closeOnLast = closeOnLast;
-  }
+	ProcessOutputDataIterator(FluentProcess fluentProcess,
+			boolean closeOnLast, Map<Integer, InputStream> inputStreams) {
+		this.fluentProcess = fluentProcess;
+		this.inputStreams = inputStreams;
+		inputStreams.entrySet()
+					.stream()
+					.map(Map.Entry::getValue)
+					.forEach(fluentProcess::registerCloseable);
+		this.closeOnLast = closeOnLast;
+	}
 
-  @Override
-  public boolean hasNext() {
-    if (isClosed()) {
-      if (closeOnLast) {
-        try {
-          close();
-        } catch (IOException ex) {
-          throw new RuntimeException(ex);
-        }
-      }
-      return false;
-    }
-    fluentProcess.checkTimeout();
+	@Override
+	public boolean hasNext() {
+		if (isClosed()) {
+			if (closeOnLast) {
+				try {
+					close();
+				} catch (IOException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+			return false;
+		}
+		fluentProcess.checkTimeout();
 
-    while (frame == null) {
-      frame = availableInputStream()
-          .map(this::readAvailables)
-          .orElse(null);
-      if (isClosed()) {
-        if (closeOnLast) {
-          try {
-            close();
-          } catch (IOException ex) {
-            throw new RuntimeException(ex);
-          }
-        }
-        return false;
-      }
-      if (frame == null) {
-        fluentProcess.checkTimeout();
+		while (frame == null) {
+			frame = availableInputStream()
+											.map(this::readAvailables)
+											.orElse(null);
+			if (isClosed()) {
+				if (closeOnLast) {
+					try {
+						close();
+					} catch (IOException ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+				return false;
+			}
+			if (frame == null) {
+				fluentProcess.checkTimeout();
 
-        fluentProcess.microSleep();
-      }
-    }
+				fluentProcess.microSleep();
+			}
+		}
 
-    return true;
-  }
+		return true;
+	}
 
-  public int available() {
-    fluentProcess.checkTimeout();
+	public int available() {
+		fluentProcess.checkTimeout();
 
-    final int available = Optional.ofNullable(frame)
-        .map(frame -> frame.bytes().length)
-        .orElseGet(() -> availableInputStream()
-            .map(e -> {
-              try {
-                return e.getValue().available();
-              } catch (IOException ex) {
-                throw new RuntimeException(ex);
-              }
-            })
-            .orElse(0));
+		final int available = Optional	.ofNullable(frame)
+										.map(frame -> frame.bytes().length)
+										.orElseGet(() -> availableInputStream()
+																				.map(e -> {
+																					try {
+																						return e.getValue().available();
+																					} catch (IOException ex) {
+																						throw new RuntimeException(ex);
+																					}
+																				})
+																				.orElse(0));
 
-    if (available <= 0) {
-      fluentProcess.microSleep();
-    }
+		if (available <= 0) {
+			fluentProcess.microSleep();
+		}
 
-    return available;
-  }
+		return available;
+	}
 
-  public boolean isClosed() {
-    return fluentProcess.isClosed()
-        && frame == null
-        && !availableInputStream().isPresent();
-  }
+	public boolean isClosed() {
+		return fluentProcess.isClosed()
+				&& frame == null
+				&& !availableInputStream().isPresent();
+	}
 
-  private Optional<Entry<Integer, InputStream>> availableInputStream() {
-    return inputStreams.entrySet().stream()
-        .filter(inputStream -> {
-          try {
-            return inputStream.getValue().available() > 0;
-          } catch (IOException ex) {
-            throw new RuntimeException(ex);
-          }
-        })
-        .findAny();
-  }
+	private Optional<Entry<Integer, InputStream>> availableInputStream() {
+		return inputStreams	.entrySet()
+							.stream()
+							.filter(inputStream -> {
+								try {
+									return inputStream.getValue().available() > 0;
+								} catch (IOException ex) {
+									throw new RuntimeException(ex);
+								}
+							})
+							.findAny();
+	}
 
-  private OutputData readAvailables(Map.Entry<Integer, InputStream> inputStream) {
-    try {
-      int available = inputStream.getValue().available();
-      if (available > 0) {
-        byte[] outputBuffer = new byte[available];
-        int value = inputStream.getValue().read(outputBuffer);
-        if (value > 0) {
-          return new OutputData(inputStream.getKey(), outputBuffer);
-        }
-      }
-      return null;
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
+	private OutputData readAvailables(Map.Entry<Integer, InputStream> inputStream) {
+		try {
+			int available = inputStream.getValue().available();
+			if (available > 0) {
+				byte[] outputBuffer = new byte[available];
+				int value = inputStream.getValue().read(outputBuffer);
+				if (value > 0) {
+					return new OutputData(inputStream.getKey(), outputBuffer);
+				}
+			}
+			return null;
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
-  @Override
-  public OutputData next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
-    }
+	@Override
+	public OutputData next() {
+		if (!hasNext()) {
+			throw new NoSuchElementException();
+		}
 
-    try {
-      return frame;
-    } finally {
-      frame = null;
-    }
-  }
+		try {
+			return frame;
+		} finally {
+			frame = null;
+		}
+	}
 
-  @Override
-  public void close() throws IOException {
-    fluentProcess.close();
-  }
+	@Override
+	public void close() throws IOException {
+		fluentProcess.close();
+	}
 
 }

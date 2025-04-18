@@ -32,100 +32,102 @@ import java.util.stream.Collectors;
 
 class ProcessOutputLineIterator implements Iterator<OutputLine>, Closeable {
 
-  private final Map<Integer, ProcessOutputInputStream> processOutputDataInputStreams;
-  private final Map<Integer, BufferedReader> bufferedReaders;
-  private final boolean closeOnLast;
-  private OutputLine line = null;
+	private final Map<Integer, ProcessOutputInputStream> processOutputDataInputStreams;
+	private final Map<Integer, BufferedReader> bufferedReaders;
+	private final boolean closeOnLast;
+	private OutputLine line = null;
 
-  ProcessOutputLineIterator(
-      Map<Integer, ProcessOutputInputStream> processOutputDataInputStreams,
-      boolean closeOnLast) {
-    this.processOutputDataInputStreams = processOutputDataInputStreams;
-    this.bufferedReaders = processOutputDataInputStreams.entrySet().stream()
-        .collect(Collectors.toMap(Map.Entry::getKey,
-            e -> new BufferedReader(new InputStreamReader(
-                e.getValue(),
-                StandardCharsets.UTF_8))));
-    this.closeOnLast = closeOnLast;
-  }
+	ProcessOutputLineIterator(
+			Map<Integer, ProcessOutputInputStream> processOutputDataInputStreams,
+			boolean closeOnLast) {
+		this.processOutputDataInputStreams = processOutputDataInputStreams;
+		this.bufferedReaders = processOutputDataInputStreams.entrySet()
+															.stream()
+															.collect(Collectors.toMap(Map.Entry::getKey,
+																	e -> new BufferedReader(new InputStreamReader(
+																			e.getValue(),
+																			StandardCharsets.UTF_8))));
+		this.closeOnLast = closeOnLast;
+	}
 
-  @Override
-  public boolean hasNext() {
-    if (line != null) {
-      return true;
-    }
+	@Override
+	public boolean hasNext() {
+		if (line != null) {
+			return true;
+		}
 
-    while (line == null) {
-      for (Map.Entry<Integer, BufferedReader> bufferedReaderEntry : bufferedReaders.entrySet()) {
-        Integer fd = bufferedReaderEntry.getKey();
-        BufferedReader bufferedReader = bufferedReaderEntry.getValue();
-        if (tryReadLine(fd, bufferedReader)) {
-          return true;
-        }
-      }
-      if (processOutputDataInputStreams.values().stream()
-          .allMatch(ProcessOutputInputStream::isClosed)) {
-        if (closeOnLast) {
-          try {
-            close();
-          } catch (IOException ex) {
-            throw new RuntimeException(ex);
-          }
-        }
-        return false;
-      }
-    }
+		while (line == null) {
+			for (Map.Entry<Integer, BufferedReader> bufferedReaderEntry : bufferedReaders.entrySet()) {
+				Integer fd = bufferedReaderEntry.getKey();
+				BufferedReader bufferedReader = bufferedReaderEntry.getValue();
+				if (tryReadLine(fd, bufferedReader)) {
+					return true;
+				}
+			}
+			if (processOutputDataInputStreams	.values()
+												.stream()
+												.allMatch(ProcessOutputInputStream::isClosed)) {
+				if (closeOnLast) {
+					try {
+						close();
+					} catch (IOException ex) {
+						throw new RuntimeException(ex);
+					}
+				}
+				return false;
+			}
+		}
 
-    return true;
-  }
+		return true;
+	}
 
-  private boolean tryReadLine(Integer fd, BufferedReader bufferedReader) {
-    try {
-      if (bufferedReader.ready()) {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-          return false;
-        } else {
-          this.line = new OutputLine(fd, line);
-          return true;
-        }
-      }
-      return false;
-    } catch (IOException ex) {
-      throw new RuntimeException(ex);
-    }
-  }
+	private boolean tryReadLine(Integer fd, BufferedReader bufferedReader) {
+		try {
+			if (bufferedReader.ready()) {
+				String line = bufferedReader.readLine();
+				if (line == null) {
+					return false;
+				} else {
+					this.line = new OutputLine(fd, line);
+					return true;
+				}
+			}
+			return false;
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
-  @Override
-  public OutputLine next() {
-    if (!hasNext()) {
-      throw new NoSuchElementException();
-    }
+	@Override
+	public OutputLine next() {
+		if (!hasNext()) {
+			throw new NoSuchElementException();
+		}
 
-    try {
-      return line;
-    } finally {
-      line = null;
-    }
-  }
+		try {
+			return line;
+		} finally {
+			line = null;
+		}
+	}
 
-  @Override
-  public void close() throws IOException {
-    IOException ioException = null;
-    for (BufferedReader bufferedReader : this.bufferedReaders.values()) {
-      try {
-        bufferedReader.close();
-      } catch (IOException ex) {
-        if (ioException == null) {
-          ioException = ex;
-        } else {
-          ioException.addSuppressed(ex);
-        }
-      }
-    }
-    if (ioException != null) {
-      throw ioException;
-    }
-  }
+	@Override
+	public void close() throws IOException {
+		IOException ioException = null;
+		for (BufferedReader bufferedReader : this.bufferedReaders.values()) {
+			try {
+				bufferedReader.close();
+			} catch (IOException ex) {
+				if (ioException == null) {
+					ioException = ex;
+				} else {
+					ioException.addSuppressed(ex);
+				}
+			}
+		}
+		if (ioException != null) {
+			throw ioException;
+		}
+	}
 
 }

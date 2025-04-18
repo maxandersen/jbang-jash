@@ -21,32 +21,32 @@
 package com.ongres.process;
 
 public class OutputLine {
-  public final Integer fd;
-  public final String line;
+	public final Integer fd;
+	public final String line;
 
-  OutputLine(Integer fd, String line) {
-    this.fd = fd;
-    this.line = line;
-  }
+	OutputLine(Integer fd, String line) {
+		this.fd = fd;
+		this.line = line;
+	}
 
-  public Integer fd() {
-    return fd;
-  }
+	public Integer fd() {
+		return fd;
+	}
 
-  public String line() {
-    return line;
-  }
+	public String line() {
+		return line;
+	}
 
-  public boolean isStdout() {
-    return fd == FluentProcess.STDOUT;
-  }
+	public boolean isStdout() {
+		return fd == FluentProcess.STDOUT;
+	}
 
-  public boolean isStderr() {
-    return fd == FluentProcess.STDERR;
-  }
+	public boolean isStderr() {
+		return fd == FluentProcess.STDERR;
+	}
 
-  @Override
-  public String toString() {
-    return fd + ":" + line;
-  }
+	@Override
+	public String toString() {
+		return fd + ":" + line;
+	}
 }

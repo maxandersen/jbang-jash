@@ -27,72 +27,72 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 class LineStreamInputStream extends InputStream {
-  private final Stream<String> stream;
-  private final Iterator<String> iterator;
-  private byte[] buffer = null;
-  private int bufferIndex = 0;
+	private final Stream<String> stream;
+	private final Iterator<String> iterator;
+	private byte[] buffer = null;
+	private int bufferIndex = 0;
 
-  public LineStreamInputStream(Stream<String> stream) {
-    this.stream = stream;
-    this.iterator = stream.iterator();
-  }
+	public LineStreamInputStream(Stream<String> stream) {
+		this.stream = stream;
+		this.iterator = stream.iterator();
+	}
 
-  @Override
-  public int read(byte[] buffer, int off, int len) throws IOException {
-    if (fill() < 0) {
-      return -1;
-    }
+	@Override
+	public int read(byte[] buffer, int off, int len) throws IOException {
+		if (fill() < 0) {
+			return -1;
+		}
 
-    final int size = Math.min(len, this.buffer.length - this.bufferIndex);
-    System.arraycopy(this.buffer, this.bufferIndex, buffer, off, size);
-    this.bufferIndex += size;
-    return size;
-  }
+		final int size = Math.min(len, this.buffer.length - this.bufferIndex);
+		System.arraycopy(this.buffer, this.bufferIndex, buffer, off, size);
+		this.bufferIndex += size;
+		return size;
+	}
 
-  @Override
-  public int read() throws IOException {
-    try {
-      if (fill() < 0) {
-        return -1;
-      }
-      int read = buffer[bufferIndex++] & 0xFF;
+	@Override
+	public int read() throws IOException {
+		try {
+			if (fill() < 0) {
+				return -1;
+			}
+			int read = buffer[bufferIndex++] & 0xFF;
 
-      return read;
-    } catch (IllegalStateException ex) {
-      return -1;
-    } catch (RuntimeException ex) {
-      if (ex.getCause() instanceof IOException) {
-        return -1;
-      }
-      throw ex;
-    }
-  }
+			return read;
+		} catch (IllegalStateException ex) {
+			return -1;
+		} catch (RuntimeException ex) {
+			if (ex.getCause() instanceof IOException) {
+				return -1;
+			}
+			throw ex;
+		}
+	}
 
-  private int fill() {
-    while (buffer == null || bufferIndex >= buffer.length) {
-      if (iterator.hasNext()) {
-        buffer = (iterator.next() + FluentProcess.NEWLINE_DELIMITER)
-            .getBytes(StandardCharsets.UTF_8);
-        bufferIndex = 0;
-        return buffer.length;
-      } else {
-        return -1;
-      }
-    }
-    return buffer.length - bufferIndex;
-  }
+	private int fill() {
+		while (buffer == null || bufferIndex >= buffer.length) {
+			if (iterator.hasNext()) {
+				buffer = (iterator.next() + FluentProcess.NEWLINE_DELIMITER)
+																			.getBytes(StandardCharsets.UTF_8);
+				bufferIndex = 0;
+				return buffer.length;
+			} else {
+				return -1;
+			}
+		}
+		return buffer.length - bufferIndex;
+	}
 
-  @Override
-  public int available() throws IOException {
-    if (buffer != null) {
-      return buffer.length - bufferIndex;
-    }
-    return iterator.hasNext() ? 1 : 0;
-  }
+	@Override
+	public int available() throws IOException {
+		if (buffer != null) {
+			return buffer.length - bufferIndex;
+		}
+		return iterator.hasNext() ? 1 : 0;
+	}
 
-  @Override
-  public void close() throws IOException {
-    stream.close();
-  }
+	@Override
+	public void close() throws IOException {
+		stream.close();
+	}
 
 }

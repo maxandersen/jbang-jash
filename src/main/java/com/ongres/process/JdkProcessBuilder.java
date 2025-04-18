@@ -31,48 +31,48 @@ import java.util.stream.Stream;
 
 class JdkProcessBuilder extends CustomProcessBuilder<JdkProcess> {
 
-  private final ProcessBuilder processBuilder;
+	private final ProcessBuilder processBuilder;
 
-  JdkProcessBuilder(FluentProcessBuilder builder) {
-    this.processBuilder = new ProcessBuilder(
-        Stream.concat(
-            builder.asShell?Stream.of(builder.getShell(), "-c", builder.shellPrefix + builder.command) : Stream.of(builder.command),
-            builder.args.stream()
-            ).toArray(String[]::new))
-        .redirectError(Redirect.PIPE)
-        .redirectInput(Redirect.PIPE)
-        .redirectOutput(Redirect.PIPE);
-  }
+	JdkProcessBuilder(FluentProcessBuilder builder) {
+		this.processBuilder = new ProcessBuilder(
+				Stream.concat(
+						builder.asShell ? Stream.of(builder.getShell(), "-c", builder.shellPrefix + builder.command)
+								: Stream.of(builder.command),
+						builder.args.stream()).toArray(String[]::new))
+																		.redirectError(Redirect.PIPE)
+																		.redirectInput(Redirect.PIPE)
+																		.redirectOutput(Redirect.PIPE);
+	}
 
-  @Override
-  public List<String> command() {
-    return new ArrayList<>(processBuilder.command());
-  }
+	@Override
+	public List<String> command() {
+		return new ArrayList<>(processBuilder.command());
+	}
 
-  @Override
-  public Map<String, String> environment() {
-    return new HashMap<>(processBuilder.environment());
-  }
+	@Override
+	public Map<String, String> environment() {
+		return new HashMap<>(processBuilder.environment());
+	}
 
-  @Override
-  public void setEnvironment(Map<String, String> environment) {
-    processBuilder.environment().clear();
-    processBuilder.environment().putAll(environment);
-  }
+	@Override
+	public void setEnvironment(Map<String, String> environment) {
+		processBuilder.environment().clear();
+		processBuilder.environment().putAll(environment);
+	}
 
-  @Override
-  public Path directory() {
-    return processBuilder.directory().toPath();
-  }
+	@Override
+	public Path directory() {
+		return processBuilder.directory().toPath();
+	}
 
-  @Override
-  public ProcessBuilder directory(Path directory) {
-    return processBuilder.directory(directory.toFile());
-  }
+	@Override
+	public ProcessBuilder directory(Path directory) {
+		return processBuilder.directory(directory.toFile());
+	}
 
-  @Override
-  public JdkProcess start() throws IOException {
-    return new JdkProcess(this, processBuilder.start());
-  }
+	@Override
+	public JdkProcess start() throws IOException {
+		return new JdkProcess(this, processBuilder.start());
+	}
 
 }
