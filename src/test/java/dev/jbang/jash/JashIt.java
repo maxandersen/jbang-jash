@@ -158,7 +158,7 @@ public class JashIt {
 			output.close();
 			Assertions.fail();
 		} catch (ProcessException ex) {
-			Assertions.assertEquals("Command sh -c 79 exited with code 127", ex.getMessage());
+			Assertions.assertEquals("Command 'sh -c 79' exited with code 127", ex.getMessage());
 			Assertions.assertEquals(127, ex.getExitCode());
 			Assertions.assertIterableEquals(
 					Stream	.of("sh", "-c", "79")
@@ -183,7 +183,7 @@ public class JashIt {
 		Assertions.assertFalse(output.output().isPresent());
 		Assertions.assertTrue(output.exception().get() instanceof ProcessException);
 		ProcessException ex = (ProcessException) output.exception().get();
-		Assertions.assertEquals("Command sh -c echo hello world; 79 exited with code 127",
+		Assertions.assertEquals("Command 'sh -c echo hello world; 79' exited with code 127",
 				ex.getMessage());
 		Assertions.assertEquals(127, ex.getExitCode());
 		Assertions.assertIterableEquals(
@@ -202,7 +202,7 @@ public class JashIt {
 				output.output().get());
 		Assertions.assertTrue(output.exception().get() instanceof ProcessException);
 		ProcessException ex = (ProcessException) output.exception().get();
-		Assertions.assertEquals("Command sh -c echo hello world; 79 exited with code 127",
+		Assertions.assertEquals("Command 'sh -c echo hello world; 79' exited with code 127",
 				ex.getMessage());
 		Assertions.assertEquals(127, ex.getExitCode());
 		Assertions.assertIterableEquals(

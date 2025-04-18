@@ -43,8 +43,8 @@ public class ProcessException extends RuntimeException {
 	}
 
 	private static String buildMessage(int exitCode, Collection<String> args) {
-		return "Command " + args.stream().collect(Collectors.joining(" "))
-				+ " exited with code " + exitCode;
+		return String.format("Command '%s' exited with code %d", args.stream().collect(Collectors.joining(" ")),
+				exitCode);
 	}
 
 	public int getExitCode() {
