@@ -108,15 +108,7 @@ Java 8+ and Maven are required to build this project.
 Run following command:
 
 ```bash
-mvn clean package
-```
-
-## Maven Profiles
-
-- Safer: Slower but safer profile used to look for errors before pushing to SCM
-
-```bash
-mvn verify -P safer
+gradle build
 ```
 
 ### Integration tests
@@ -126,13 +118,7 @@ some very common commands (sh, cat, env and sed).
 To launch the integrations tests run the following command:
 
 ```bash
-mvn verify -P integration
-```
-
-To run integration tests with Java debugging enabled on port 8000:
-
-```bash
-mvn verify -P integration -Dmaven.failsafe.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
+gradle test
 ```
 
 ## Origin story
