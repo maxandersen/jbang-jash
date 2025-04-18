@@ -38,11 +38,11 @@ import static io.ongres.jash.Jash.*;
 $("echo hello; echo world").stream()
 ```
 
-* Same result as above but pipelining with `cat`:
+* As above but pipelining with `cat -n` to add line numbers:
 
 ```java
 import static io.ongres.jash.Jash.*;
-$("echo hello; echo world").pipe("cat").stream()
+$("echo hello; echo world").pipe("cat", "-n").stream()
 ```
 
 * Same result as above but passing to `cat` a pure Java Stream:
@@ -54,7 +54,7 @@ Jash.start("cat")
 		.stream()
 ```
 
-* This will print "hello" followed by "world" but will fail when terminating the Java Stream:
+* This will print "hello" followed by "world" but will fail when terminating the Java Stream because the process will exit with a non-zero exit code:
 
 ```java
 Jash.start(
@@ -66,7 +66,7 @@ Jash.start(
 		.count() // <- exception will be thrown here
 ```
 
-* Same output as the above but will fail when leaving the `try` block:
+* Same output as the above but will fail when leaving the `try` block because the process exited with a non-zero exit code:
 
 ```java
 try (Stream<String> stream = Jash.start(
@@ -81,13 +81,10 @@ try (Stream<String> stream = Jash.start(
 } // <- exception will be thrown here when Stream.close() will be called
 ```
 
-* Same result as above but will not fail at all:
+* Same result as above but will not fail at all as the process exit code is allowed:
 
 ```java
-Jash.start(
-	"sh",
-	"-c",
-	"echo hello; echo world; exit 79")
+Jash.$("echo hello; echo world; exit 79")
 		.withAllowedExitCode(79)
 		.stream()
 		.peek(System.out::println)
@@ -97,9 +94,7 @@ Jash.start(
 * You can also specify a timeout that will result in a `ProcessTimeoutException` exception:
 
 ```java
-Jash.start(
-	"sh",
-	"-c",
+Jash.shell(
 	"sleep 3600")
 		.withTimeout(Duration.of(1, ChronoUnit.SECONDS))
 		.stream()
@@ -112,7 +107,7 @@ Java 8+ and Maven are required to build this project.
 
 Run following command:
 
-```
+```bash
 mvn clean package
 ```
 
@@ -120,7 +115,7 @@ mvn clean package
 
 - Safer: Slower but safer profile used to look for errors before pushing to SCM
 
-```
+```bash
 mvn verify -P safer
 ```
 
@@ -130,13 +125,13 @@ The integration test suite requires a Unix compatible system is installed on the
 some very common commands (sh, cat, env and sed).
 To launch the integrations tests run the following command:
 
-```
+```bash
 mvn verify -P integration
 ```
 
 To run integration tests with Java debugging enabled on port 8000:
 
-```
+```bash
 mvn verify -P integration -Dmaven.failsafe.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000"
 ```
 
