@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.IOException;
 import java.io.InputStream;

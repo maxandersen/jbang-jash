@@ -18,10 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
-
-import static com.ongres.process.FluentProcess.DEFAULT_SHELLPREFIX;
-import static com.ongres.process.FluentProcess.getDefaultShell;
+package dev.jbang.jash;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,18 +36,18 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FluentProcessBuilder {
+public class JashBuilder {
 
 	final String command;
 	boolean asShell = false;
 	String shell;
-	String shellPrefix = DEFAULT_SHELLPREFIX;
+	String shellPrefix = Jash.DEFAULT_SHELLPREFIX;
 	Supplier<CustomProcessBuilder<?>> processBuilderSupplier = () -> new JdkProcessBuilder(this);
 	List<String> args = new ArrayList<>();
 	Map<Integer, Integer> outputs = new HashMap<>(
 			Stream	.of(
-							FluentProcess.STDOUT,
-							FluentProcess.STDERR)
+							Jash.STDOUT,
+							Jash.STDERR)
 					.collect(Collectors.toMap(fd -> fd, fd -> fd)));
 	Path workPath = null;
 	Map<String, String> environment = new HashMap<>(System.getenv());
@@ -62,14 +59,14 @@ public class FluentProcessBuilder {
 	/**
 	 * Create a builder for specified command.
 	 */
-	public FluentProcessBuilder(String command) {
+	public JashBuilder(String command) {
 		this.command = command;
 	}
 
 	/**
 	 * Overwrite command arguments.
 	 */
-	public FluentProcessBuilder args(List<String> args) {
+	public JashBuilder args(List<String> args) {
 		this.args.clear();
 		this.args.addAll(args);
 		return this;
@@ -78,7 +75,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Overwrite command arguments.
 	 */
-	public FluentProcessBuilder args(String... args) {
+	public JashBuilder args(String... args) {
 		args(Arrays.asList(args));
 		return this;
 	}
@@ -86,7 +83,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Add a command argument.
 	 */
-	public FluentProcessBuilder arg(String arg) {
+	public JashBuilder arg(String arg) {
 		this.args.add(arg);
 		return this;
 	}
@@ -94,29 +91,29 @@ public class FluentProcessBuilder {
 	/**
 	 * Add a multiline command argument.
 	 */
-	public FluentProcessBuilder multilineArg(String... lines) {
+	public JashBuilder multilineArg(String... lines) {
 		return multilineArg(Arrays.asList(lines).stream());
 	}
 
 	/**
 	 * Add a multiline command argument.
 	 */
-	public FluentProcessBuilder multilineArg(Collection<String> lines) {
+	public JashBuilder multilineArg(Collection<String> lines) {
 		return multilineArg(lines.stream());
 	}
 
 	/**
 	 * Add a multiline command argument.
 	 */
-	public FluentProcessBuilder multilineArg(Stream<String> lines) {
-		this.args.add(lines.collect(Collectors.joining(FluentProcess.NEWLINE_DELIMITER)));
+	public JashBuilder multilineArg(Stream<String> lines) {
+		this.args.add(lines.collect(Collectors.joining(Jash.NEWLINE_DELIMITER)));
 		return this;
 	}
 
 	/**
 	 * Set the command working path.
 	 */
-	public FluentProcessBuilder workPath(Path workPath) {
+	public JashBuilder workPath(Path workPath) {
 		this.workPath = workPath;
 		return this;
 	}
@@ -124,7 +121,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Remove environment variables inherited by the JVM.
 	 */
-	public FluentProcessBuilder clearEnvironment() {
+	public JashBuilder clearEnvironment() {
 		this.environment.clear();
 		return this;
 	}
@@ -132,7 +129,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Overwrite the command environment variables.
 	 */
-	public FluentProcessBuilder environment(Map<String, String> environment) {
+	public JashBuilder environment(Map<String, String> environment) {
 		this.environment.putAll(environment);
 		return this;
 	}
@@ -140,7 +137,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Set an environment variable for the command.
 	 */
-	public FluentProcessBuilder environment(String name, String value) {
+	public JashBuilder environment(String name, String value) {
 		this.environment.put(name, value);
 		return this;
 	}
@@ -153,7 +150,7 @@ public class FluentProcessBuilder {
 	 * element.
 	 * </p>
 	 */
-	public FluentProcessBuilder dontCloseAfterLast() {
+	public JashBuilder dontCloseAfterLast() {
 		this.closeAfterLast = false;
 		return this;
 	}
@@ -166,13 +163,13 @@ public class FluentProcessBuilder {
 	 * code.
 	 * </p>
 	 */
-	public FluentProcessBuilder allowedExitCodes(Collection<Integer> exitCodes) {
+	public JashBuilder allowedExitCodes(Collection<Integer> exitCodes) {
 		this.allowedExitCodes.clear();
 		this.allowedExitCodes.addAll(exitCodes);
 		return this;
 	}
 
-	public FluentProcessBuilder withAllowedExitCodes(int... exitCodes) {
+	public JashBuilder withAllowedExitCodes(int... exitCodes) {
 		this.allowedExitCodes.addAll(Arrays	.stream(exitCodes)
 											.boxed()
 											.collect(Collectors.toList()));
@@ -183,7 +180,7 @@ public class FluentProcessBuilder {
 	 * Add an allowed exit code that will be considered a successful exit code for
 	 * the command.
 	 */
-	public FluentProcessBuilder allowedExitCode(int exitCode) {
+	public JashBuilder allowedExitCode(int exitCode) {
 		this.allowedExitCodes.add(exitCode);
 		return this;
 	}
@@ -191,39 +188,39 @@ public class FluentProcessBuilder {
 	/**
 	 * Redirect stdout to stderr.
 	 */
-	public FluentProcessBuilder redirectStdoutToStderr() {
-		this.outputs.put(FluentProcess.STDOUT, FluentProcess.STDERR);
+	public JashBuilder redirectStdoutToStderr() {
+		this.outputs.put(Jash.STDOUT, Jash.STDERR);
 		return this;
 	}
 
 	/**
 	 * Redirect stderr to stdout.
 	 */
-	public FluentProcessBuilder redirectStderrToStdout() {
-		this.outputs.put(FluentProcess.STDERR, FluentProcess.STDOUT);
+	public JashBuilder redirectStderrToStdout() {
+		this.outputs.put(Jash.STDERR, Jash.STDOUT);
 		return this;
 	}
 
 	/**
 	 * Do not output stdout.
 	 */
-	public FluentProcessBuilder noStdout() {
-		this.outputs.remove(FluentProcess.STDOUT);
+	public JashBuilder noStdout() {
+		this.outputs.remove(Jash.STDOUT);
 		return this;
 	}
 
 	/**
 	 * Do not output stderr.
 	 */
-	public FluentProcessBuilder noStderr() {
-		this.outputs.remove(FluentProcess.STDERR);
+	public JashBuilder noStderr() {
+		this.outputs.remove(Jash.STDERR);
 		return this;
 	}
 
 	/**
 	 * Specifies the command that will be prefixed to all shell or pipeShell runs
 	 */
-	public FluentProcessBuilder shellPrefix(String prefix) {
+	public JashBuilder shellPrefix(String prefix) {
 		this.shellPrefix = prefix;
 		return this;
 	}
@@ -231,7 +228,7 @@ public class FluentProcessBuilder {
 	/**
 	 * Specifies which shell to use for shell or pipeShell
 	 */
-	public FluentProcessBuilder shell(String shell) {
+	public JashBuilder shell(String shell) {
 		this.shell = shell;
 		return this;
 	}
@@ -240,7 +237,7 @@ public class FluentProcessBuilder {
 	 * Start the process (in background) and return a {@code FluentProcess} instance
 	 * wrapping the running process.
 	 */
-	public FluentProcess start() {
+	public Jash start() {
 		try {
 			CustomProcessBuilder<?> builder = processBuilderSupplier.get();
 			if (workPath != null) {
@@ -249,18 +246,18 @@ public class FluentProcessBuilder {
 			builder.setEnvironment(environment);
 			CustomProcess process = builder.start();
 			Instant start = Instant.now();
-			return new FluentProcess(this, builder, process, start);
+			return new Jash(this, builder, process, start);
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public FluentProcessBuilder as$() {
+	public JashBuilder as$() {
 		asShell = true;
 		return this;
 	}
 
 	public String getShell() {
-		return shell == null ? getDefaultShell() : shell;
+		return shell == null ? Jash.getDefaultShell() : shell;
 	}
 }

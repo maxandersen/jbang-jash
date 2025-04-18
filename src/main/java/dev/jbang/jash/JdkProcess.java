@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -86,11 +86,11 @@ public class JdkProcess extends CustomProcess {
 		return process.isAlive();
 	}
 
-	public static Process asProcess(FluentProcess process) {
+	public static Process asProcess(Jash process) {
 		if (process.getProcess() instanceof JdkProcess) {
 			return JdkProcess.class.cast(process.getProcess()).process;
 		}
-		throw new IllegalArgumentException(FluentProcess.class.getSimpleName() + " is using "
+		throw new IllegalArgumentException(Jash.class.getSimpleName() + " is using "
 				+ process.getProcess().getClass().getSimpleName());
 	}
 }

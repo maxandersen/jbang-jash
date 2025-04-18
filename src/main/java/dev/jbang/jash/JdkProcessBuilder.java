@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -33,7 +33,7 @@ class JdkProcessBuilder extends CustomProcessBuilder<JdkProcess> {
 
 	private final ProcessBuilder processBuilder;
 
-	JdkProcessBuilder(FluentProcessBuilder builder) {
+	JdkProcessBuilder(JashBuilder builder) {
 		this.processBuilder = new ProcessBuilder(
 				Stream.concat(
 						builder.asShell ? Stream.of(builder.getShell(), "-c", builder.shellPrefix + builder.command)

@@ -18,9 +18,9 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
-import static com.ongres.process.FluentProcess.$;
+import static dev.jbang.jash.Jash.$;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class SimpleFluentProcessIT {
+public class SimpleJashIT {
 
 	@Test
 	public void testShell() throws Exception {

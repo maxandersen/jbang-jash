@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class FluentProcess implements AutoCloseable {
+public class Jash implements AutoCloseable {
 
 	private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 
@@ -68,18 +68,18 @@ public class FluentProcess implements AutoCloseable {
 	/**
 	 * Build a process from a command with (optional) arguments.
 	 */
-	public static FluentProcessBuilder builder(String command, String... args) {
-		return new FluentProcessBuilder(command)
-												.args(args);
+	public static JashBuilder builder(String command, String... args) {
+		return new JashBuilder(command)
+										.args(args);
 	}
 
 	/**
 	 * Start a process from a command with (optional) arguments.
 	 */
-	public static FluentProcess start(String command, String... args) {
-		return new FluentProcessBuilder(command)
-												.args(args)
-												.start();
+	public static Jash start(String command, String... args) {
+		return new JashBuilder(command)
+										.args(args)
+										.start();
 	}
 
 	private final CustomProcessBuilder<?> processBuilder;
@@ -94,7 +94,7 @@ public class FluentProcess implements AutoCloseable {
 	private final String shell;
 	private final String shellPrefix;
 
-	public FluentProcess(FluentProcessBuilder builder,
+	public Jash(JashBuilder builder,
 			CustomProcessBuilder<?> processBuilder,
 			CustomProcess process,
 			Instant start) {
@@ -115,7 +115,7 @@ public class FluentProcess implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	private FluentProcess(FluentProcess parent, Set<Integer> allowedExitCodes) {
+	private Jash(Jash parent, Set<Integer> allowedExitCodes) {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
@@ -130,7 +130,7 @@ public class FluentProcess implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	private FluentProcess(FluentProcess parent, Duration timeout) {
+	private Jash(Jash parent, Duration timeout) {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
@@ -145,7 +145,7 @@ public class FluentProcess implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	private FluentProcess(FluentProcess parent, boolean closeAfterLast) {
+	private Jash(Jash parent, boolean closeAfterLast) {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
@@ -160,7 +160,7 @@ public class FluentProcess implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	private FluentProcess(FluentProcess parent, Map<Integer, Integer> outputs) {
+	private Jash(Jash parent, Map<Integer, Integer> outputs) {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
@@ -175,19 +175,19 @@ public class FluentProcess implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	public static FluentProcess $(String cmd) {
+	public static Jash $(String cmd) {
 		return shell(cmd);
 	}
 
-	public static FluentProcess shell(String s) {
+	public static Jash shell(String s) {
 		return start(getDefaultShell(), "-c", s);
 	}
 
-	public FluentProcess pipe$(String cmd) {
+	public Jash pipe$(String cmd) {
 		return pipeShell(cmd);
 	}
 
-	public FluentProcess pipeShell(String s) {
+	public Jash pipeShell(String s) {
 		return pipe(getShell(), "-c", s);
 	}
 
@@ -198,9 +198,9 @@ public class FluentProcess implements AutoCloseable {
 	/**
 	 * Return a {@code FluentProcess} that allow only exit code 0.
 	 */
-	public FluentProcess withoutAllowedExitCodes() {
-		return new FluentProcess(this, new HashSet<>(Stream	.of(0)
-															.collect(Collectors.toSet())));
+	public Jash withoutAllowedExitCodes() {
+		return new Jash(this, new HashSet<>(Stream	.of(0)
+													.collect(Collectors.toSet())));
 	}
 
 	/**
@@ -211,44 +211,44 @@ public class FluentProcess implements AutoCloseable {
 	 * code.
 	 * </p>
 	 */
-	public FluentProcess withAllowedExitCodes(Set<Integer> exitCodes) {
-		return new FluentProcess(this, new HashSet<>(exitCodes));
+	public Jash withAllowedExitCodes(Set<Integer> exitCodes) {
+		return new Jash(this, new HashSet<>(exitCodes));
 	}
 
 	/**
 	 * Return a {@code FluentProcess} adding specified allowed exit codes that will
 	 * be considered as successful exit codes for the command.
 	 */
-	public FluentProcess withAllowedExitCodes(int... exitCodes) {
+	public Jash withAllowedExitCodes(int... exitCodes) {
 		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
 		allowedExitCodes.addAll(Arrays	.stream(exitCodes)
 										.boxed()
 										.collect(Collectors.toList()));
-		return new FluentProcess(this, allowedExitCodes);
+		return new Jash(this, allowedExitCodes);
 	}
 
 	/**
 	 * Return a {@code FluentProcess} adding an allowed exit code that will be
 	 * considered a successful exit code for the command.
 	 */
-	public FluentProcess withAllowedExitCode(int exitCode) {
+	public Jash withAllowedExitCode(int exitCode) {
 		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
 		allowedExitCodes.add(exitCode);
-		return new FluentProcess(this, allowedExitCodes);
+		return new Jash(this, allowedExitCodes);
 	}
 
 	/**
 	 * Return a {@code FluentProcess} that does not have a timeout.
 	 */
-	public FluentProcess withoutTimeout() {
-		return new FluentProcess(this, (Duration) null);
+	public Jash withoutTimeout() {
+		return new Jash(this, (Duration) null);
 	}
 
 	/**
 	 * Return a {@code FluentProcess} that fails alter specified timeout.
 	 */
-	public FluentProcess withTimeout(Duration timeout) {
-		return new FluentProcess(this, timeout);
+	public Jash withTimeout(Duration timeout) {
+		return new Jash(this, timeout);
 	}
 
 	/**
@@ -258,8 +258,8 @@ public class FluentProcess implements AutoCloseable {
 	 * element.
 	 * </p>
 	 */
-	public FluentProcess withoutCloseAfterLast() {
-		return new FluentProcess(this, false);
+	public Jash withoutCloseAfterLast() {
+		return new Jash(this, false);
 	}
 
 	/**
@@ -269,44 +269,44 @@ public class FluentProcess implements AutoCloseable {
 	 * This is the default.
 	 * </p>
 	 */
-	public FluentProcess withCloseAfterLast() {
-		return new FluentProcess(this, true);
+	public Jash withCloseAfterLast() {
+		return new Jash(this, true);
 	}
 
 	/**
 	 * Redirect stdout to stderr.
 	 */
-	public FluentProcess withStdoutToStderr() {
+	public Jash withStdoutToStderr() {
 		Map<Integer, Integer> outputs = new HashMap<>(this.outputs);
-		outputs.put(FluentProcess.STDOUT, FluentProcess.STDERR);
-		return new FluentProcess(this, outputs);
+		outputs.put(Jash.STDOUT, Jash.STDERR);
+		return new Jash(this, outputs);
 	}
 
 	/**
 	 * Redirect stderr to stdout.
 	 */
-	public FluentProcess withStderrToStdout() {
+	public Jash withStderrToStdout() {
 		Map<Integer, Integer> outputs = new HashMap<>(this.outputs);
-		outputs.put(FluentProcess.STDERR, FluentProcess.STDOUT);
-		return new FluentProcess(this, outputs);
+		outputs.put(Jash.STDERR, Jash.STDOUT);
+		return new Jash(this, outputs);
 	}
 
 	/**
 	 * Do not output stdout.
 	 */
-	public FluentProcess withoutStdout() {
+	public Jash withoutStdout() {
 		Map<Integer, Integer> outputs = new HashMap<>(this.outputs);
-		outputs.remove(FluentProcess.STDOUT);
-		return new FluentProcess(this, outputs);
+		outputs.remove(Jash.STDOUT);
+		return new Jash(this, outputs);
 	}
 
 	/**
 	 * Do not output stderr.
 	 */
-	public FluentProcess withoutStderr() {
+	public Jash withoutStderr() {
 		Map<Integer, Integer> outputs = new HashMap<>(this.outputs);
-		outputs.remove(FluentProcess.STDERR);
-		return new FluentProcess(this, outputs);
+		outputs.remove(Jash.STDERR);
+		return new Jash(this, outputs);
 	}
 
 	/**
@@ -624,7 +624,7 @@ public class FluentProcess implements AutoCloseable {
 	 * </pre>
 	 * </p>
 	 */
-	public <T> T as(Function<FluentProcess, T> transformer) {
+	public <T> T as(Function<Jash, T> transformer) {
 		return transformer.apply(this);
 	}
 
@@ -635,12 +635,12 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess pipe(FluentProcess fluentProcess) {
+	public Jash pipe(Jash jash) {
 		InputStream inputStream = new ByteArrayStreamInputStream(
 				withoutCloseAfterLast().streamStdoutBytes());
 		registerCloseable(inputStream);
-		runAsyncWithStdin(fluentProcess, inputStream, this::close, null, true);
-		return fluentProcess;
+		runAsyncWithStdin(jash, inputStream, this::close, null, true);
+		return jash;
 	}
 
 	/**
@@ -650,12 +650,12 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess pipe(FluentProcess fluentProcess, Executor executor) {
+	public Jash pipe(Jash jash, Executor executor) {
 		InputStream inputStream = new ByteArrayStreamInputStream(
 				withoutCloseAfterLast().streamStdoutBytes());
 		registerCloseable(inputStream);
-		runAsyncWithStdin(fluentProcess, inputStream, this::close, executor, true);
-		return fluentProcess;
+		runAsyncWithStdin(jash, inputStream, this::close, executor, true);
+		return jash;
 	}
 
 	/**
@@ -667,15 +667,15 @@ public class FluentProcess implements AutoCloseable {
 	 * </p>
 	 */
 	@SuppressWarnings("resource")
-	public FluentProcess pipe(String command, String... args) {
+	public Jash pipe(String command, String... args) {
 		InputStream inputStream = new ByteArrayStreamInputStream(
 				withoutCloseAfterLast().streamStdoutBytes());
 		registerCloseable(inputStream);
-		FluentProcess fluentProcess = new FluentProcessBuilder(command)
-																		.args(args)
-																		.start();
-		runAsyncWithStdin(fluentProcess, inputStream, this::close, null, true);
-		return fluentProcess;
+		Jash jash = new JashBuilder(command)
+											.args(args)
+											.start();
+		runAsyncWithStdin(jash, inputStream, this::close, null, true);
+		return jash;
 	}
 
 	/**
@@ -685,7 +685,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamWihtoutClosing(InputStream inputStream) {
+	public Jash inputStreamWihtoutClosing(InputStream inputStream) {
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, false);
 		return this;
 	}
@@ -697,7 +697,7 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamWihtoutClosing(InputStream inputStream, Executor executor) {
+	public Jash inputStreamWihtoutClosing(InputStream inputStream, Executor executor) {
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, false);
 		return this;
 	}
@@ -709,7 +709,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamWihtoutClosing(Stream<String> stream) {
+	public Jash inputStreamWihtoutClosing(Stream<String> stream) {
 		InputStream inputStream = new LineStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, false);
 		return this;
@@ -722,7 +722,7 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamWihtoutClosing(Stream<String> stream, Executor executor) {
+	public Jash inputStreamWihtoutClosing(Stream<String> stream, Executor executor) {
 		InputStream inputStream = new LineStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, false);
 		return this;
@@ -735,7 +735,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamOfBytesWihtoutClosing(Stream<byte[]> stream) {
+	public Jash inputStreamOfBytesWihtoutClosing(Stream<byte[]> stream) {
 		InputStream inputStream = new ByteArrayStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, false);
 		return this;
@@ -748,7 +748,7 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamOfBytesWihtoutClosing(Stream<byte[]> stream, Executor executor) {
+	public Jash inputStreamOfBytesWihtoutClosing(Stream<byte[]> stream, Executor executor) {
 		InputStream inputStream = new ByteArrayStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, false);
 		return this;
@@ -761,7 +761,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStream(InputStream inputStream) {
+	public Jash inputStream(InputStream inputStream) {
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, true);
 		return this;
 	}
@@ -773,7 +773,7 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStream(InputStream inputStream, Executor executor) {
+	public Jash inputStream(InputStream inputStream, Executor executor) {
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, true);
 		return this;
 	}
@@ -785,7 +785,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStream(Stream<String> stream) {
+	public Jash inputStream(Stream<String> stream) {
 		InputStream inputStream = new LineStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, true);
 		return this;
@@ -798,7 +798,7 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStream(Stream<String> stream, Executor executor) {
+	public Jash inputStream(Stream<String> stream, Executor executor) {
 		InputStream inputStream = new LineStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, true);
 		return this;
@@ -811,7 +811,7 @@ public class FluentProcess implements AutoCloseable {
 	 * {@code Executor}. The thread will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamOfBytes(Stream<byte[]> stream) {
+	public Jash inputStreamOfBytes(Stream<byte[]> stream) {
 		InputStream inputStream = new ByteArrayStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, null, true);
 		return this;
@@ -824,23 +824,23 @@ public class FluentProcess implements AutoCloseable {
 	 * will be closed when the process exits.
 	 * </p>
 	 */
-	public FluentProcess inputStreamOfBytes(Stream<byte[]> stream, Executor executor) {
+	public Jash inputStreamOfBytes(Stream<byte[]> stream, Executor executor) {
 		InputStream inputStream = new ByteArrayStreamInputStream(stream);
 		runAsyncWithStdin(this, inputStream, inputStream::close, executor, true);
 		return this;
 	}
 
-	private void runAsyncWithStdin(FluentProcess fluentProcess,
+	private void runAsyncWithStdin(Jash jash,
 			InputStream inputStream, AutoCloseable closeable, Executor executor,
 			boolean closeStdin) {
 		final CompletableFuture<Void> future;
 		if (executor == null) {
 			future = CompletableFuture
-										.runAsync(() -> fluentProcess.writeToStdin(
+										.runAsync(() -> jash.writeToStdin(
 												inputStream, closeStdin, false));
 		} else {
 			future = CompletableFuture
-										.runAsync(() -> fluentProcess.writeToStdin(
+										.runAsync(() -> jash.writeToStdin(
 												inputStream, closeStdin, false),
 												executor);
 		}
@@ -854,7 +854,7 @@ public class FluentProcess implements AutoCloseable {
 																		throw new RuntimeException(ex);
 																	}
 																});
-		fluentProcess.registerCloseable(futureWithClose::join);
+		jash.registerCloseable(futureWithClose::join);
 	}
 
 	@Override

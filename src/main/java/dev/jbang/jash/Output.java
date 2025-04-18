@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,34 +18,32 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-abstract class CustomProcess {
+public class Output {
+	private final Optional<String> output;
+	private final Optional<String> error;
+	private final Optional<Exception> exception;
 
-	abstract List<String> command();
+	Output(Optional<String> output, Optional<String> error,
+			Optional<Exception> exception) {
+		super();
+		this.output = output;
+		this.error = error;
+		this.exception = exception;
+	}
 
-	abstract Map<String, String> environment();
+	public Optional<String> output() {
+		return output;
+	}
 
-	abstract Path directory();
+	public Optional<String> error() {
+		return error;
+	}
 
-	abstract OutputStream getOutputStream();
-
-	abstract InputStream getInputStream();
-
-	abstract InputStream getErrorStream();
-
-	abstract int exitValue();
-
-	abstract Process destroyForcibly();
-
-	abstract int waitFor() throws InterruptedException;
-
-	abstract boolean isAlive();
-
+	public Optional<Exception> exception() {
+		return exception;
+	}
 }

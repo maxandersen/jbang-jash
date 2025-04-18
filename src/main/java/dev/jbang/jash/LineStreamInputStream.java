@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,8 +71,8 @@ class LineStreamInputStream extends InputStream {
 	private int fill() {
 		while (buffer == null || bufferIndex >= buffer.length) {
 			if (iterator.hasNext()) {
-				buffer = (iterator.next() + FluentProcess.NEWLINE_DELIMITER)
-																			.getBytes(StandardCharsets.UTF_8);
+				buffer = (iterator.next() + Jash.NEWLINE_DELIMITER)
+																	.getBytes(StandardCharsets.UTF_8);
 				bufferIndex = 0;
 				return buffer.length;
 			} else {

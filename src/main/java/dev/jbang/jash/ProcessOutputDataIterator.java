@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -31,19 +31,19 @@ import java.util.Optional;
 
 class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 
-	private final FluentProcess fluentProcess;
+	private final Jash jash;
 	private final Map<Integer, InputStream> inputStreams;
 	private final boolean closeOnLast;
 	private OutputData frame = null;
 
-	ProcessOutputDataIterator(FluentProcess fluentProcess,
+	ProcessOutputDataIterator(Jash jash,
 			boolean closeOnLast, Map<Integer, InputStream> inputStreams) {
-		this.fluentProcess = fluentProcess;
+		this.jash = jash;
 		this.inputStreams = inputStreams;
 		inputStreams.entrySet()
 					.stream()
 					.map(Map.Entry::getValue)
-					.forEach(fluentProcess::registerCloseable);
+					.forEach(jash::registerCloseable);
 		this.closeOnLast = closeOnLast;
 	}
 
@@ -59,7 +59,7 @@ class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 			}
 			return false;
 		}
-		fluentProcess.checkTimeout();
+		jash.checkTimeout();
 
 		while (frame == null) {
 			frame = availableInputStream()
@@ -76,9 +76,9 @@ class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 				return false;
 			}
 			if (frame == null) {
-				fluentProcess.checkTimeout();
+				jash.checkTimeout();
 
-				fluentProcess.microSleep();
+				jash.microSleep();
 			}
 		}
 
@@ -86,7 +86,7 @@ class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 	}
 
 	public int available() {
-		fluentProcess.checkTimeout();
+		jash.checkTimeout();
 
 		final int available = Optional	.ofNullable(frame)
 										.map(frame -> frame.bytes().length)
@@ -101,14 +101,14 @@ class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 																				.orElse(0));
 
 		if (available <= 0) {
-			fluentProcess.microSleep();
+			jash.microSleep();
 		}
 
 		return available;
 	}
 
 	public boolean isClosed() {
-		return fluentProcess.isClosed()
+		return jash.isClosed()
 				&& frame == null
 				&& !availableInputStream().isPresent();
 	}
@@ -157,7 +157,7 @@ class ProcessOutputDataIterator implements Iterator<OutputData>, Closeable {
 
 	@Override
 	public void close() throws IOException {
-		fluentProcess.close();
+		jash.close();
 	}
 
 }

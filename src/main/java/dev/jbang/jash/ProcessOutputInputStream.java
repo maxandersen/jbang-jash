@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,22 +18,22 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 class ProcessOutputInputStream extends InputStream {
-	private final FluentProcess fluentProcess;
+	private final Jash jash;
 	private final InputStream inputStreamForOutput;
 	private byte[] buffer = new byte[8192];
 	private int bufferLength = 0;
 	private int bufferIndex = 0;
 
-	public ProcessOutputInputStream(FluentProcess fluentProcess, InputStream inputStreamForOutput) {
-		this.fluentProcess = fluentProcess;
+	public ProcessOutputInputStream(Jash jash, InputStream inputStreamForOutput) {
+		this.jash = jash;
 		this.inputStreamForOutput = inputStreamForOutput;
-		fluentProcess.registerCloseable(inputStreamForOutput);
+		jash.registerCloseable(inputStreamForOutput);
 	}
 
 	@Override
@@ -63,7 +63,7 @@ class ProcessOutputInputStream extends InputStream {
 		if (isClosed()) {
 			return false;
 		}
-		fluentProcess.checkTimeout();
+		jash.checkTimeout();
 
 		while (bufferIndex >= bufferLength) {
 			final int length = Math.min(inputStreamForOutput.available(), buffer.length);
@@ -75,9 +75,9 @@ class ProcessOutputInputStream extends InputStream {
 				if (isClosed()) {
 					return false;
 				}
-				fluentProcess.checkTimeout();
+				jash.checkTimeout();
 
-				fluentProcess.microSleep();
+				jash.microSleep();
 			}
 		}
 		return true;
@@ -85,12 +85,12 @@ class ProcessOutputInputStream extends InputStream {
 
 	@Override
 	public int available() throws IOException {
-		fluentProcess.checkTimeout();
+		jash.checkTimeout();
 
 		final int available = inputStreamForOutput.available();
 
 		if (available <= 0) {
-			fluentProcess.microSleep();
+			jash.microSleep();
 		}
 
 		return available;
@@ -98,12 +98,12 @@ class ProcessOutputInputStream extends InputStream {
 
 	@Override
 	public void close() throws IOException {
-		fluentProcess.close();
+		jash.close();
 	}
 
 	public boolean isClosed() {
 		try {
-			return fluentProcess.isClosed()
+			return jash.isClosed()
 					&& bufferIndex >= bufferLength
 					&& inputStreamForOutput.available() <= 0;
 		} catch (IOException ex) {

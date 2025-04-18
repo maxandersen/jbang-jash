@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,7 +18,7 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
 import java.nio.charset.StandardCharsets;
 
@@ -41,11 +41,11 @@ public class OutputData {
 	}
 
 	public boolean isStdout() {
-		return fd == FluentProcess.STDOUT;
+		return fd == Jash.STDOUT;
 	}
 
 	public boolean isStderr() {
-		return fd == FluentProcess.STDERR;
+		return fd == Jash.STDERR;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 /*-
  *  § 
- * fluent-process
+ * jash
  *    
  * Copyright (C) 2020 OnGres, Inc.
  *    
@@ -18,29 +18,40 @@
  * § §
  */
 
-package com.ongres.process;
+package dev.jbang.jash;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class ProcessTimeoutException extends ProcessException {
+public class ProcessException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Duration timeout;
+	private final int exitCode;
+	private final Collection<String> args;
 
-	public ProcessTimeoutException(Duration timeout, Collection<String> args) {
-		super(buildMessage(timeout, args), 1, args);
-		this.timeout = timeout;
+	public ProcessException(int exitCode, Collection<String> args) {
+		super(buildMessage(exitCode, args));
+		this.exitCode = exitCode;
+		this.args = args;
 	}
 
-	private static String buildMessage(Duration timeout, Collection<String> args) {
+	protected ProcessException(String message, int exitCode, Collection<String> args) {
+		super(message);
+		this.exitCode = exitCode;
+		this.args = args;
+	}
+
+	private static String buildMessage(int exitCode, Collection<String> args) {
 		return "Command " + args.stream().collect(Collectors.joining(" "))
-				+ " timeout after " + timeout.toString();
+				+ " exited with code " + exitCode;
 	}
 
-	public Duration getTimeout() {
-		return timeout;
+	public int getExitCode() {
+		return exitCode;
+	}
+
+	public Collection<String> getArgs() {
+		return args;
 	}
 }
