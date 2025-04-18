@@ -162,7 +162,7 @@ public class JashIT {
 			Assertions.fail();
 		}, ProcessException.class);
 
-		assertThat(ex).hasMessage("Command 'sh -c 79' exited with code 127");
+		assertThat(ex).hasMessageEndingWith(" 79: command not found");
 		assertThat(ex.getExitCode()).isEqualTo(127);
 		assertThat(ex.getArgs())
 								.containsExactly("sh", "-c", "79");
