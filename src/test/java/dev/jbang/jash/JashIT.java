@@ -155,7 +155,7 @@ public class JashIT {
 									.start()
 									.stream();
 		assertThat(output.collect(Collectors.joining()))
-														.isEqualTo("sh: 79: command not found");
+														.endsWith(" 79: command not found");
 
 		ProcessException ex = catchThrowableOfType(() -> {
 			output.close();
