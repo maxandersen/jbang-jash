@@ -196,7 +196,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} that allow only exit code 0.
+	 * Return a {@code Jash} that allow only exit code 0.
 	 */
 	public Jash withoutAllowedExitCodes() {
 		return new Jash(this, new HashSet<>(Stream	.of(0)
@@ -204,7 +204,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} with a set of allowed exit code values that
+	 * Return a {@code Jash} with a set of allowed exit code values that
 	 * will be considered as successful exit codes for the command.
 	 * <p>
 	 * Warning: overrides the default value that considers 0 as a successful exit
@@ -216,7 +216,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} adding specified allowed exit codes that will
+	 * Return a {@code Jash} adding specified allowed exit codes that will
 	 * be considered as successful exit codes for the command.
 	 */
 	public Jash withAllowedExitCodes(int... exitCodes) {
@@ -228,7 +228,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} adding an allowed exit code that will be
+	 * Return a {@code Jash} adding an allowed exit code that will be
 	 * considered a successful exit code for the command.
 	 */
 	public Jash withAllowedExitCode(int exitCode) {
@@ -238,21 +238,21 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} that does not have a timeout.
+	 * Return a {@code Jash} that does not have a timeout.
 	 */
 	public Jash withoutTimeout() {
 		return new Jash(this, (Duration) null);
 	}
 
 	/**
-	 * Return a {@code FluentProcess} that fails alter specified timeout.
+	 * Return a {@code Jash} that fails alter specified timeout.
 	 */
 	public Jash withTimeout(Duration timeout) {
 		return new Jash(this, timeout);
 	}
 
 	/**
-	 * Return a {@code FluentProcess} that throw exception only when closed.
+	 * Return a {@code Jash} that throw exception only when closed.
 	 * <p>
 	 * By default a failed process will throw an exception when beyond the last
 	 * element.
@@ -263,7 +263,7 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code FluentProcess} that throw exception only when beyond the last
+	 * Return a {@code Jash} that throw exception only when beyond the last
 	 * element.
 	 * <p>
 	 * This is the default.
@@ -620,7 +620,7 @@ public class Jash implements AutoCloseable {
 	 * Can be used, for instance, to retrieve the original process with:
 	 * 
 	 * <pre>
-	 * java.lang.Process process = fluentProcess.as(JdkProcess::asProcess);
+	 * java.lang.Process process = jash.as(JdkProcess::asProcess);
 	 * </pre>
 	 * </p>
 	 */
@@ -891,8 +891,8 @@ public class Jash implements AutoCloseable {
 	 * <p>
 	 * By default this method is called when the process exit and all outputs are
 	 * fully read. If you need to read any process output even in case of process
-	 * failure consider call method {@code FluentProcess.withoutCloseAfterLast()} or
-	 * {@code FluentProcessBuilder.dontCloseAfterLast()}.
+	 * failure consider call method {@code Jash.withoutCloseAfterLast()} or
+	 * {@code JashBuilder.dontCloseAfterLast()}.
 	 * </p>
 	 */
 	@Override

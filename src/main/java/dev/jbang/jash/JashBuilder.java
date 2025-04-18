@@ -234,7 +234,7 @@ public class JashBuilder {
 	}
 
 	/**
-	 * Start the process (in background) and return a {@code FluentProcess} instance
+	 * Start the process (in background) and return a {@code Jash} instance
 	 * wrapping the running process.
 	 */
 	public Jash start() {
