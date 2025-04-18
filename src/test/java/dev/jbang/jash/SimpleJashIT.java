@@ -1,6 +1,6 @@
 /*-
  *  § 
- * docker-junit-extension
+ * jash
  *    
  * Copyright (C) 2019 OnGres, Inc.
  *    

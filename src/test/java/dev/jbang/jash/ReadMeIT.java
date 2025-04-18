@@ -1,6 +1,6 @@
 /*-
  *  § 
- * docker-junit-extension
+ * jash
  *    
  * Copyright (C) 2019 OnGres, Inc.
  *    
@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
@@ -41,8 +42,9 @@ public class ReadMeIT {
 		assertThat(Jash	.start("sh",
 								"-c",
 								"echo hello; echo world")
-						.stream())
-									.containsExactly("hello", "world");
+						.stream()
+						.collect(Collectors.toList()))
+														.containsExactly("hello", "world");
 	}
 
 	public static String escapeJavaString(String str) {
@@ -89,8 +91,9 @@ public class ReadMeIT {
 
 		assertThat(
 				$("echo hello; echo world")
-											.stream())
-														.containsExactly("hello", "world");
+											.stream()
+											.collect(Collectors.toList()))
+																			.containsExactly("hello", "world");
 	}
 
 	/**
@@ -102,8 +105,10 @@ public class ReadMeIT {
 
 		assertThat(
 				$("echo hello; echo world")	.pipe("cat", "-n")
-											.stream())
-														.containsExactly("     1\thello", "     2\tworld");
+											.stream()
+											.collect(Collectors.toList()))
+																			.containsExactly("     1\thello",
+																					"     2\tworld");
 	}
 
 	/**

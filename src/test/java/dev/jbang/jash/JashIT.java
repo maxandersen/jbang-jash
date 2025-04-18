@@ -1,6 +1,6 @@
 /*-
  *  § 
- * docker-junit-extension
+ * jash
  *    
  * Copyright (C) 2019 OnGres, Inc.
  *    
@@ -39,23 +39,26 @@ public class JashIT {
 	@Test
 	public void test() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
-						.stream().collect(Collectors.toList()))
-									.containsExactly("hello", "world");
+						.stream()
+						.collect(Collectors.toList()))
+														.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testShell() throws Exception {
 		assertThat(Jash	.shell("echo hello; echo world")
-						.stream().collect(Collectors.toList()))
-									.containsExactly("hello", "world");
+						.stream()
+						.collect(Collectors.toList()))
+														.containsExactly("hello", "world");
 	}
 
 	@Test
 	public void testShellPipe() throws Exception {
 		assertThat(Jash	.$("echo hello; echo world")
 						.pipe$("cat")
-						.stream().collect(Collectors.toList()))
-									.containsExactly("hello", "world");
+						.stream()
+						.collect(Collectors.toList()))
+														.containsExactly("hello", "world");
 	}
 
 	@Test
@@ -65,8 +68,9 @@ public class JashIT {
 					.as$()
 					.start()
 					.pipe$("cat")
-					.stream().collect(Collectors.toList()))
-								.containsExactly("hello", "world");
+					.stream()
+					.collect(Collectors.toList()))
+													.containsExactly("hello", "world");
 	}
 
 	@Test
@@ -93,8 +97,9 @@ public class JashIT {
 	public void testPipe() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "echo hello; echo world")
 						.pipe("cat")
-						.stream().collect(Collectors.toList()))
-									.containsExactly("hello", "world");
+						.stream()
+						.collect(Collectors.toList()))
+														.containsExactly("hello", "world");
 	}
 
 	@Test
