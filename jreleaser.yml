@@ -1,0 +1,55 @@
+project:
+  name: jbang-jash
+  description: Fluent API for running commands
+  longDescription: |
+    A Java library to provide a Process interface that is fluent, predictable and with a great developer experience.
+  links:
+    homepage: https://github.com/jbangdev/jbang-jash
+    documentation: https://github.com/jbangdev/jbang-jash
+    license: https://github.com/jbangdev/jbang-jash/blob/main/LICENSE
+  authors:
+    - Max Rydahl Andersen
+    - Tako Schotanus
+  license: MIT
+  tags:
+    - jbang
+    - java
+  languages:
+    java:
+      groupId: dev.jbang
+      artifactId: jash
+  inceptionYear: 2025
+  stereotype: NONE
+
+release:
+  github:
+    overwrite: true
+    draft: true
+    sign: true
+    releaseName: '{{tagName}}'
+    skipTag: true
+    milestone:
+      close: false
+    changelog:
+      formatted: always
+      preset: "conventional-commits"
+      format: '- {{commitShortHash}} {{commitTitle}}'
+
+checksum:
+  individual: true
+
+signing:
+  active: ALWAYS
+  armored: true
+
+deploy:
+  maven:
+    nexus2:
+      maven-central:
+        active: ALWAYS
+        url: https://oss.sonatype.org/service/local
+        snapshotUrl: https://oss.sonatype.org/content/repositories/snapshots/
+        closeRepository: true
+        releaseRepository: true
+        stagingRepositories:
+          - build/staging-deploy
