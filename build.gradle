@@ -1,0 +1,189 @@
+plugins {
+	id 'java-library'
+	id 'io.toolebox.git-versioner' version '1.6.7'
+	id 'com.diffplug.spotless' version '7.0.3'
+	id 'maven-publish'
+	id 'org.jreleaser' version '1.17.0'
+}
+
+group = 'dev.jbang'
+
+def javaVersion = System.getProperty('java.version')
+def majorVersion = javaVersion.split('\\.')[0].toInteger()
+if (majorVersion < 11) {
+	throw new GradleException("""
+		⚠️ This build requires Java 11 or newer but you're using Java ${javaVersion}
+		Please use JAVA_HOME with Java 11 or newer to run this build.
+		Current JAVA_HOME: ${System.getProperty('java.home')}.
+		If you have jbang installed, you can run it with:
+		eval \$(jbang jdk java-env 11+)
+	""".stripIndent())
+}
+
+javadoc {
+	options.encoding = 'UTF-8'
+	//remove this to see all the missing tags/parameters.
+	options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+repositories {
+	mavenCentral()
+}
+
+java {
+	withJavadocJar()
+	withSourcesJar()
+}
+
+compileJava {
+	options.encoding = 'UTF-8'
+	options.release = 8;
+}
+
+versioner {
+	pattern {
+		pattern = "%M.%m.%p(.%c-SNAPSHOT)"
+	}
+	git {
+		authentication {
+			https {
+				token = project.hasProperty('github_token') ? getProperty('github_token') : "unknown_github_token"
+			}
+		}
+	}
+}
+
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "org.assertj:assertj-core:3.24.2"
+}
+
+tasks.withType(AbstractArchiveTask) {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+spotless {
+	format 'misc', {
+		target '**/*.gradle', '**/*.md', '**/.gitignore'
+		targetExclude 'build/**/*', 'out/**/*'
+		trimTrailingWhitespace()
+		leadingSpacesToTabs()
+		endWithNewline()
+	}
+	java {
+		importOrder 'java', 'javax', 'org', 'com', 'dev.jbang', ''
+		removeUnusedImports()
+		eclipse().configFile "misc/eclipse_formatting_nowrap.xml"
+		targetExclude 'build/**/*'
+	}
+	format 'xml', {
+		targetExclude 'build/test-results', fileTree('.idea')
+		target '**/*.xml', '**/*.nuspec'
+	}
+}
+
+test {
+	useJUnitPlatform()
+	
+	if (project.hasProperty('testDiagnostics')) {
+		// Memory diagnostics
+		jvmArgs "-XX:+HeapDumpOnOutOfMemoryError"
+		jvmArgs "-XX:HeapDumpPath=build/heapdumps"
+		jvmArgs "-XX:MaxMetaspaceSize=256m"
+		
+		// GC logging
+		jvmArgs "-verbose:gc"
+		jvmArgs "-XX:+PrintGCDetails"
+		jvmArgs "-Xloggc:build/gc.log"
+		
+		// Thread dumps on OOM
+		jvmArgs "-XX:+HeapDumpBeforeFullGC"
+		jvmArgs "-XX:+HeapDumpAfterFullGC"
+		
+		// Enable flight recorder
+		jvmArgs "-XX:StartFlightRecording=filename=build/flight.jfr,dumponexit=true,settings=profile"
+		
+		// Enable native memory tracking
+		jvmArgs "-XX:NativeMemoryTracking=detail"
+		
+		// Enable more detailed error reporting
+		jvmArgs "-XX:+ShowCodeDetailsInExceptionMessages"
+		
+		// Enable class unloading
+		jvmArgs "-XX:+ClassUnloading"
+		jvmArgs "-XX:+ClassUnloadingWithConcurrentMark"
+		
+		// Add debug logging
+		testLogging {
+			events "passed", "skipped", "failed", "standardOut", "standardError"
+			exceptionFormat "full"
+			showCauses true
+			showExceptions true
+			showStackTraces true
+		}
+		
+		// Print diagnostic information
+		doFirst {
+			println "Running tests with diagnostic options:"
+			println "  - Heap size: ${maxHeapSize}"
+			println "  - GC Log: build/gc.log"
+			println "  - Flight Recorder: build/flight.jfr"
+			println "  - Heap Dumps: build/heapdumps"
+		}
+	}
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'dev.jbang'
+			artifactId = 'jash'
+
+			from components.java
+
+			pom {
+				name = 'JBang Jash'
+				description = 'A Java library to provide a Process interface that is fluent, predictable and with a great developer experience.'
+				url = 'https://github.com/jbangdev/jbang-jash'
+				inceptionYear = '2025'
+				licenses {
+					license {
+						name = 'Apache License, Version 2.0'
+						url = 'https://github.com/jbangdev/jbang-jash/blob/main/LICENSE'
+					}
+				}
+				developers {
+					developer {
+						id = 'maxandersen'
+						name = 'Max Rydahl Andersen'
+					}
+					developer {
+						id = 'quintesse'
+						name = 'Tako Schotanus'
+					}
+					developer { // creator of fluent-process of which jash is a fork
+						id = 'teoincontatto'
+						name = 'Matteo Melli'
+					}
+				}
+				scm {
+					connection = 'scm:git:https://github.com/jbangdev/jbang-jash'
+					developerConnection = 'scm:git:https://github.com/jbangdev/jbang-jash'
+					url = 'http://github.com/jbangdev/jbang-jash'
+				}
+			}
+		}
+	}
+
+	repositories {
+		maven {
+			url = layout.buildDirectory.dir('staging-deploy')
+		}
+	}
+}
+
+jreleaser {
+	configFile = file('jreleaser.yml')
+}
