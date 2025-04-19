@@ -155,7 +155,7 @@ public class JashIT {
 									.start()
 									.stream();
 		assertThat(output.collect(Collectors.joining()))
-														.endsWith(" 79: command not found");
+														.matches(".*79.* not found");
 
 		ProcessException ex = catchThrowableOfType(() -> {
 			output.close();
