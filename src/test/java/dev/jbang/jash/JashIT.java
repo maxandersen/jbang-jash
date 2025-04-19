@@ -20,6 +20,7 @@
 
 package dev.jbang.jash;
 
+import static dev.jbang.jash.Jash.shell;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
@@ -235,6 +236,23 @@ public class JashIT {
 			.allowedExitCode(79)
 			.start()
 			.get();
+	}
+
+	@Test
+	public void testBuilderAnyExitCode() throws Exception {
+		assertThat(Jash	.builder("sh", "-c", "exit 42")
+						.withAnyExitCode()
+						.start()
+						.getExitCode())
+										.isEqualTo(42);
+	}
+
+	@Test
+	public void testAnyExitCode() throws Exception {
+		assertThat(shell("exit 42")
+									.withAnyExitCode()
+									.getExitCode())
+													.isEqualTo(42);
 	}
 
 	@Test

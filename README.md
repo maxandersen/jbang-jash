@@ -101,6 +101,17 @@ Jash.$("echo hello; echo world; exit 79")
 		.count();
 ```
 
+* Same result as above but will not fail as any exit code is allowed:
+
+```java
+Jash.$("echo hello; echo world; exit 79")
+		.withAllowedExitCode(79)
+		.withAnyExitCode()
+		.stream()
+		.peek(System.out::println)
+		.count();
+```
+
 * You can also specify a timeout that will result in a `ProcessTimeoutException` exception:
 
 ```java

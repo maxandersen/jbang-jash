@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -49,7 +51,7 @@ import java.util.stream.StreamSupport;
 public class Jash implements AutoCloseable {
 
 	private static final ByteArrayInputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
-
+	static final Predicate<Integer> DEFAULT_EXIT_CODE_PREDICATE = code -> code == 0;
 	public static final int STDERR = 2;
 	public static final int STDOUT = 1;
 
@@ -85,7 +87,7 @@ public class Jash implements AutoCloseable {
 	private final CustomProcessBuilder<?> processBuilder;
 	private final CustomProcess process;
 	private final Instant start;
-	private final Set<Integer> allowedExitCodes;
+	private final Predicate<Integer> exitCodePredicate;
 	private final Duration timeout;
 	private final boolean closeAfterLast;
 	private final Map<Integer, Integer> outputs;
@@ -101,7 +103,7 @@ public class Jash implements AutoCloseable {
 		this.processBuilder = processBuilder;
 		this.process = process;
 		this.start = start;
-		this.allowedExitCodes = builder.allowedExitCodes;
+		this.exitCodePredicate = builder.exitCodePredicate;
 		this.timeout = builder.timeout;
 		this.closeAfterLast = builder.closeAfterLast;
 		this.outputs = builder.outputs;
@@ -115,11 +117,11 @@ public class Jash implements AutoCloseable {
 							.flatMap(s -> Optional.ofNullable(timeout).map(t -> s.plus(t)));
 	}
 
-	private Jash(Jash parent, Set<Integer> allowedExitCodes) {
+	private Jash(Jash parent, Predicate<Integer> exitCodePredicate) {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
-		this.allowedExitCodes = allowedExitCodes;
+		this.exitCodePredicate = exitCodePredicate;
 		this.timeout = parent.timeout;
 		this.closeAfterLast = parent.closeAfterLast;
 		this.outputs = parent.outputs;
@@ -134,7 +136,7 @@ public class Jash implements AutoCloseable {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
-		this.allowedExitCodes = parent.allowedExitCodes;
+		this.exitCodePredicate = parent.exitCodePredicate;
 		this.timeout = timeout;
 		this.closeAfterLast = parent.closeAfterLast;
 		this.outputs = parent.outputs;
@@ -149,7 +151,7 @@ public class Jash implements AutoCloseable {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
-		this.allowedExitCodes = parent.allowedExitCodes;
+		this.exitCodePredicate = parent.exitCodePredicate;
 		this.timeout = parent.timeout;
 		this.closeAfterLast = closeAfterLast;
 		this.outputs = parent.outputs;
@@ -164,7 +166,7 @@ public class Jash implements AutoCloseable {
 		this.processBuilder = parent.processBuilder;
 		this.process = parent.process;
 		this.start = parent.start;
-		this.allowedExitCodes = parent.allowedExitCodes;
+		this.exitCodePredicate = parent.exitCodePredicate;
 		this.timeout = parent.timeout;
 		this.closeAfterLast = parent.closeAfterLast;
 		this.outputs = outputs;
@@ -198,9 +200,29 @@ public class Jash implements AutoCloseable {
 	/**
 	 * Return a {@code Jash} that allow only exit code 0.
 	 */
-	public Jash withoutAllowedExitCodes() {
-		return new Jash(this, new HashSet<>(Stream	.of(0)
-													.collect(Collectors.toSet())));
+	public Jash withoutexitCodePredicate() {
+		return new Jash(this, DEFAULT_EXIT_CODE_PREDICATE);
+	}
+
+	/**
+	 * 
+	 * @param exitCodes
+	 * @return
+	 */
+	public Jash withAnyExitCode() {
+		return new Jash(this, (code) -> true);
+	}
+
+	/**
+	 * Return a {@code Jash} with predicatewill be
+	 * considered as successful exit codes for the command.
+	 * <p>
+	 * Warning: overrides the default value that considers 0 as a successful exit
+	 * code.
+	 * </p>
+	 */
+	public Jash withExitCodePredicate(Predicate<Integer> exitCodePredicate) {
+		return new Jash(this, exitCodePredicate);
 	}
 
 	/**
@@ -212,7 +234,8 @@ public class Jash implements AutoCloseable {
 	 * </p>
 	 */
 	public Jash withAllowedExitCodes(Set<Integer> exitCodes) {
-		return new Jash(this, new HashSet<>(exitCodes));
+		// if java 10, could use Set.copyOf(exitCodes)
+		return new Jash(this, Collections.unmodifiableSet(new HashSet<>(exitCodes))::contains);
 	}
 
 	/**
@@ -220,11 +243,9 @@ public class Jash implements AutoCloseable {
 	 * considered as successful exit codes for the command.
 	 */
 	public Jash withAllowedExitCodes(int... exitCodes) {
-		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
-		allowedExitCodes.addAll(Arrays	.stream(exitCodes)
-										.boxed()
-										.collect(Collectors.toList()));
-		return new Jash(this, allowedExitCodes);
+		Set<Integer> newExitCodes = Arrays.stream(exitCodes).boxed().collect(Collectors.toSet());
+		Predicate<Integer> combinedPredicate = code -> this.exitCodePredicate.test(code) || newExitCodes.contains(code);
+		return new Jash(this, combinedPredicate);
 	}
 
 	/**
@@ -232,9 +253,7 @@ public class Jash implements AutoCloseable {
 	 * successful exit code for the command.
 	 */
 	public Jash withAllowedExitCode(int exitCode) {
-		Set<Integer> allowedExitCodes = new HashSet<>(this.allowedExitCodes);
-		allowedExitCodes.add(exitCode);
-		return new Jash(this, allowedExitCodes);
+		return withAllowedExitCodes(exitCode);
 	}
 
 	/**
@@ -962,10 +981,27 @@ public class Jash implements AutoCloseable {
 	}
 
 	private Exception checkExitCode(int exitCode) {
-		if (!allowedExitCodes.contains(exitCode)) {
+		if (!exitCodePredicate.test(exitCode)) {
 			return new ProcessException(exitCode, processBuilder.command());
 		}
 		return null;
+	}
+
+	/**
+	 * Get the exit code of the process.
+	 * <p>
+	 * This method will block until the process has exited.
+	 * </p>
+	 * 
+	 * Note: This will by default throw an exception if the exit code is not
+	 * allowed. Use {@code JashBuilder.allowedExitCode(int)} or
+	 * {@code JashBuilder.withAnyExitCode()} to allow specific or any exit code.
+	 * 
+	 * @return the exit code of the process
+	 */
+	public int getExitCode() {
+		join();
+		return process.exitValue();
 	}
 
 }

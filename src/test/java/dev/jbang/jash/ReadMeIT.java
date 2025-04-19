@@ -164,7 +164,20 @@ public class ReadMeIT {
 	}
 
 	/**
-	 * You can also specify a timeout that will result in a
+	 * Same result as above but will not fail as any exit code is allowed:
+	 */
+	@Test
+	public void testHelloWorldStartStreamWithAnyExitCode() {
+		assertThat(
+				$("echo hello; echo world; exit 42")
+													.withAnyExitCode()
+													.stream()
+													.peek(System.out::println)
+													.count())
+																.isEqualTo(2);
+	}
+
+	/**
 	 * `ProcessTimeoutException` exception:
 	 */
 	@Test

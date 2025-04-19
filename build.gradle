@@ -95,10 +95,10 @@ test {
 	include '**/*Test.class'
 
 	// Add test logging
-	testLogging {
-		events "passed", "skipped", "failed"
-		showStandardStreams = true
-	}
+	//testLogging {
+	//	events "passed", "skipped", "failed"
+	//	showStandardStreams = true
+	//}
 
 	if (project.hasProperty('testDiagnostics')) {
 		// Memory diagnostics

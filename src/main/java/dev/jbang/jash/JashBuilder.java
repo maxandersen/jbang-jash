@@ -1,6 +1,6 @@
 /*-
  *  § 
- * docker-junit-extension
+ * jash
  *    
  * Copyright (C) 2019 - 2020 OnGres, Inc.
  *    
@@ -20,6 +20,8 @@
 
 package dev.jbang.jash;
 
+import static dev.jbang.jash.Jash.DEFAULT_EXIT_CODE_PREDICATE;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -28,10 +30,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,8 +53,7 @@ public class JashBuilder {
 	Path workPath = null;
 	Map<String, String> environment = new HashMap<>(System.getenv());
 	boolean closeAfterLast = true;
-	Set<Integer> allowedExitCodes = new HashSet<>(
-			Stream.of(0).collect(Collectors.toList()));
+	Predicate<Integer> exitCodePredicate = DEFAULT_EXIT_CODE_PREDICATE;
 	Duration timeout = null;
 
 	/**
@@ -163,16 +163,13 @@ public class JashBuilder {
 	 * code.
 	 * </p>
 	 */
-	public JashBuilder allowedExitCodes(Collection<Integer> exitCodes) {
-		this.allowedExitCodes.clear();
-		this.allowedExitCodes.addAll(exitCodes);
+	public JashBuilder exitCodePredicate(Collection<Integer> exitCodes) {
+		this.exitCodePredicate = exitCodes::contains;
 		return this;
 	}
 
-	public JashBuilder withAllowedExitCodes(int... exitCodes) {
-		this.allowedExitCodes.addAll(Arrays	.stream(exitCodes)
-											.boxed()
-											.collect(Collectors.toList()));
+	public JashBuilder withexitCodePredicate(int... exitCodes) {
+		this.exitCodePredicate = Arrays.stream(exitCodes).boxed().collect(Collectors.toList())::contains;
 		return this;
 	}
 
@@ -181,7 +178,7 @@ public class JashBuilder {
 	 * the command.
 	 */
 	public JashBuilder allowedExitCode(int exitCode) {
-		this.allowedExitCodes.add(exitCode);
+		this.exitCodePredicate = code -> code == exitCode;
 		return this;
 	}
 
@@ -259,5 +256,10 @@ public class JashBuilder {
 
 	public String getShell() {
 		return shell == null ? Jash.getDefaultShell() : shell;
+	}
+
+	public JashBuilder withAnyExitCode() {
+		this.exitCodePredicate = (code) -> true;
+		return this;
 	}
 }
