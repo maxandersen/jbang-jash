@@ -79,7 +79,7 @@ public class JashIT {
 	public void testBadShellBuilder() throws Exception {
 		assertThrows(RuntimeException.class, () -> { // TODO: should be more specific exception
 			Jash.builder("echo hello; echo world")
-				.withShell("bad-shell")
+				.withShell("bad-shell", "-c")
 				.start()
 				.get();
 		});

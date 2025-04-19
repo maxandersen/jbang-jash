@@ -37,11 +37,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dev.jbang.jash.Jash.Shell;
+
 public class JashBuilder {
 
 	final String command;
 	boolean asShell = false;
-	String shell;
+	Jash.Shell shell;
 	String shellPrefix = Jash.DEFAULT_SHELLPREFIX;
 	Supplier<CustomProcessBuilder<?>> processBuilderSupplier = () -> new JdkProcessBuilder(this);
 	List<String> args = new ArrayList<>();
@@ -238,10 +240,12 @@ public class JashBuilder {
 	}
 
 	/**
-	 * Specifies which shell to use for shell or pipeShell
+	 * Specifies which shell and arguments to use for shell or pipeShell
+	 * 
+	 * Example: withShell("cmd.exe", "/C");
 	 */
-	public JashBuilder withShell(String shell) {
-		this.shell = shell;
+	public JashBuilder withShell(String shell, String shellArg) {
+		this.shell = new Jash.Shell(shell, shellArg);
 		return withShell();
 	}
 
@@ -269,7 +273,7 @@ public class JashBuilder {
 		return this;
 	}
 
-	public String getShell() {
+	Shell getShell() {
 		return shell == null ? Jash.getDefaultShell() : shell;
 	}
 

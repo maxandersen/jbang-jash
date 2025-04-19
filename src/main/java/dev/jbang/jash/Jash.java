@@ -59,39 +59,50 @@ public class Jash implements AutoCloseable {
 	public static final String DEFAULT_SHELLPREFIX = ""; // todo: should we set this if zsh/bash detected? "set -euo
 															// pipefail;";
 
-	private static String defaultShell;
+	private static Shell defaultShell;
 
-	static String getDefaultShell() {
+	static class Shell {
+		String shell;
+		// -c on linux/osx, /C on windows
+		String shellArg;
+
+		Shell(String shell, String shellArg) {
+			this.shell = shell;
+			this.shellArg = shellArg;
+		}
+	}
+
+	static Shell getDefaultShell() {
 		if (defaultShell == null) {
 			defaultShell = detectShell();
 		}
 		return defaultShell;
 	}
 
-	static String detectShell() {
+	static Shell detectShell() {
 
 		String shellEnv = System.getenv("SHELL");
 		if (shellEnv != null && !shellEnv.isEmpty()) {
-			return shellEnv;
+			return new Shell(shellEnv, "-c");
 		}
 
 		String comSpec = System.getenv("ComSpec");
 		if (isWindows() && comSpec != null && !comSpec.isEmpty()) {
-			return comSpec;
+			return new Shell(comSpec, "/C");
 		}
 
 		// TODO: should we check user’s login shell via /etc/passwd (UNIX) ??
 
 		// Step 4: OS default
 		if (isMac())
-			return "/bin/zsh";
+			return new Shell("/bin/zsh", "-c");
 		if (isLinux())
-			return "/bin/bash";
+			return new Shell("/bin/bash", "-c");
 		if (isWindows())
-			return "cmd.exe";
+			return new Shell("cmd.exe", "/C");
 
 		// Step 5: Final fallback
-		return "/bin/sh";
+		return new Shell("/bin/sh", "-c");
 	}
 
 	private static boolean isWindows() {
@@ -133,7 +144,7 @@ public class Jash implements AutoCloseable {
 	private final Map<Integer, Integer> outputs;
 	private final ArrayList<Closeable> closeables;
 	private final Optional<Instant> end;
-	private final String shell;
+	private final Shell shell;
 	private final String shellPrefix;
 
 	public Jash(JashBuilder builder,
@@ -222,7 +233,8 @@ public class Jash implements AutoCloseable {
 	}
 
 	public static Jash shell(String s) {
-		return start(getDefaultShell(), "-c", s);
+		Shell shell = getDefaultShell();
+		return start(shell.shell, shell.shellArg, s);
 	}
 
 	public Jash pipe$(String cmd) {
@@ -230,10 +242,10 @@ public class Jash implements AutoCloseable {
 	}
 
 	public Jash pipeShell(String s) {
-		return pipe(getShell(), "-c", s);
+		return pipe(getShell().shell, getShell().shellArg, s);
 	}
 
-	public String getShell() {
+	private Shell getShell() {
 		return shell == null ? getDefaultShell() : shell;
 	}
 
