@@ -214,8 +214,8 @@ public class Jash implements AutoCloseable {
 	}
 
 	/**
-	 * Return a {@code Jash} with predicatewill be
-	 * considered as successful exit codes for the command.
+	 * Return a {@code Jash} with predicatewill be considered as successful exit
+	 * codes for the command.
 	 * <p>
 	 * Warning: overrides the default value that considers 0 as a successful exit
 	 * code.
