@@ -163,13 +163,28 @@ public class JashBuilder {
 	 * code.
 	 * </p>
 	 */
-	public JashBuilder exitCodePredicate(Collection<Integer> exitCodes) {
+	public JashBuilder allowedExitCodes(Collection<Integer> exitCodes) {
 		this.exitCodePredicate = exitCodes::contains;
 		return this;
 	}
 
-	public JashBuilder withexitCodePredicate(int... exitCodes) {
+	public JashBuilder allowedExitCodes(int... exitCodes) {
 		this.exitCodePredicate = Arrays.stream(exitCodes).boxed().collect(Collectors.toList())::contains;
+		return this;
+	}
+
+	/**
+	 * Set a custom exit code predicate.
+	 * <p>
+	 * Warning: overrides the default value that considers 0 as a successful exit
+	 * code.
+	 * </p>
+	 * 
+	 * @param exitCodePredicate
+	 * @return
+	 */
+	public JashBuilder withExitCodePredicate(Predicate<Integer> exitCodePredicate) {
+		this.exitCodePredicate = exitCodePredicate;
 		return this;
 	}
 
@@ -217,7 +232,7 @@ public class JashBuilder {
 	/**
 	 * Specifies the command that will be prefixed to all shell or pipeShell runs
 	 */
-	public JashBuilder shellPrefix(String prefix) {
+	public JashBuilder withShellPrefix(String prefix) {
 		this.shellPrefix = prefix;
 		return this;
 	}
@@ -225,9 +240,9 @@ public class JashBuilder {
 	/**
 	 * Specifies which shell to use for shell or pipeShell
 	 */
-	public JashBuilder shell(String shell) {
+	public JashBuilder withShell(String shell) {
 		this.shell = shell;
-		return this;
+		return withShell();
 	}
 
 	/**
@@ -249,7 +264,7 @@ public class JashBuilder {
 		}
 	}
 
-	public JashBuilder as$() {
+	public JashBuilder withShell() {
 		asShell = true;
 		return this;
 	}
