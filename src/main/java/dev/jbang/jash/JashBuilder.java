@@ -37,11 +37,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dev.jbang.jash.Jash.Shell;
+
 public class JashBuilder {
 
 	final String command;
 	boolean asShell = false;
-	String shell;
+	Jash.Shell shell;
 	String shellPrefix = Jash.DEFAULT_SHELLPREFIX;
 	Supplier<CustomProcessBuilder<?>> processBuilderSupplier = () -> new JdkProcessBuilder(this);
 	List<String> args = new ArrayList<>();
@@ -163,13 +165,28 @@ public class JashBuilder {
 	 * code.
 	 * </p>
 	 */
-	public JashBuilder exitCodePredicate(Collection<Integer> exitCodes) {
+	public JashBuilder allowedExitCodes(Collection<Integer> exitCodes) {
 		this.exitCodePredicate = exitCodes::contains;
 		return this;
 	}
 
-	public JashBuilder withexitCodePredicate(int... exitCodes) {
+	public JashBuilder allowedExitCodes(int... exitCodes) {
 		this.exitCodePredicate = Arrays.stream(exitCodes).boxed().collect(Collectors.toList())::contains;
+		return this;
+	}
+
+	/**
+	 * Set a custom exit code predicate.
+	 * <p>
+	 * Warning: overrides the default value that considers 0 as a successful exit
+	 * code.
+	 * </p>
+	 * 
+	 * @param exitCodePredicate
+	 * @return
+	 */
+	public JashBuilder withExitCodePredicate(Predicate<Integer> exitCodePredicate) {
+		this.exitCodePredicate = exitCodePredicate;
 		return this;
 	}
 
@@ -217,17 +234,19 @@ public class JashBuilder {
 	/**
 	 * Specifies the command that will be prefixed to all shell or pipeShell runs
 	 */
-	public JashBuilder shellPrefix(String prefix) {
+	public JashBuilder withShellPrefix(String prefix) {
 		this.shellPrefix = prefix;
 		return this;
 	}
 
 	/**
-	 * Specifies which shell to use for shell or pipeShell
+	 * Specifies which shell and arguments to use for shell or pipeShell
+	 * 
+	 * Example: withShell("cmd.exe", "/C");
 	 */
-	public JashBuilder shell(String shell) {
-		this.shell = shell;
-		return this;
+	public JashBuilder withShell(String shell, String shellArg) {
+		this.shell = new Jash.Shell(shell, shellArg);
+		return withShell();
 	}
 
 	/**
@@ -249,12 +268,12 @@ public class JashBuilder {
 		}
 	}
 
-	public JashBuilder as$() {
+	public JashBuilder withShell() {
 		asShell = true;
 		return this;
 	}
 
-	public String getShell() {
+	Shell getShell() {
 		return shell == null ? Jash.getDefaultShell() : shell;
 	}
 

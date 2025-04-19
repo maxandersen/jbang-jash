@@ -23,6 +23,7 @@ package dev.jbang.jash;
 import static dev.jbang.jash.Jash.shell;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -66,12 +67,22 @@ public class JashIT {
 	public void testShellBuilder() throws Exception {
 		assertThat(
 				Jash.builder("echo hello; echo world")
-					.as$()
+					.withShell()
 					.start()
 					.pipe$("cat")
 					.stream()
 					.collect(Collectors.toList()))
 													.containsExactly("hello", "world");
+	}
+
+	@Test
+	public void testBadShellBuilder() throws Exception {
+		assertThrows(RuntimeException.class, () -> { // TODO: should be more specific exception
+			Jash.builder("echo hello; echo world")
+				.withShell("bad-shell", "-c")
+				.start()
+				.get();
+		});
 	}
 
 	@Test
