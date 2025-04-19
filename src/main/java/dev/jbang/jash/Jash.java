@@ -56,15 +56,55 @@ public class Jash implements AutoCloseable {
 	public static final int STDOUT = 1;
 
 	public static final String NEWLINE_DELIMITER = "\n";
-	public static final String DEFAULT_SHELLPREFIX = "set -euo pipefail;";
+	public static final String DEFAULT_SHELLPREFIX = ""; // todo: should we set this if zsh/bash detected? "set -euo
+															// pipefail;";
 
 	private static String defaultShell;
 
 	static String getDefaultShell() {
 		if (defaultShell == null) {
-			defaultShell = start("which", "bash").get();
+			defaultShell = detectShell();
 		}
 		return defaultShell;
+	}
+
+	static String detectShell() {
+
+		String shellEnv = System.getenv("SHELL");
+		if (shellEnv != null && !shellEnv.isEmpty()) {
+			return shellEnv;
+		}
+
+		String comSpec = System.getenv("ComSpec");
+		if (isWindows() && comSpec != null && !comSpec.isEmpty()) {
+			return comSpec;
+		}
+
+		// TODO: should we check user’s login shell via /etc/passwd (UNIX) ??
+
+		// Step 4: OS default
+		if (isMac())
+			return "/bin/zsh";
+		if (isLinux())
+			return "/bin/bash";
+		if (isWindows())
+			return "cmd.exe";
+
+		// Step 5: Final fallback
+		return "/bin/sh";
+	}
+
+	private static boolean isWindows() {
+		return System.getProperty("os.name").toLowerCase().contains("win");
+	}
+
+	private static boolean isMac() {
+		return System.getProperty("os.name").toLowerCase().contains("mac");
+	}
+
+	private static boolean isLinux() {
+		return System.getProperty("os.name").toLowerCase().contains("nux") ||
+				System.getProperty("os.name").toLowerCase().contains("nix");
 	}
 
 	/**
