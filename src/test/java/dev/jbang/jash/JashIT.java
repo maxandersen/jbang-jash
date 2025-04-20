@@ -86,6 +86,17 @@ public class JashIT {
 	}
 
 	@Test
+	public void testJashToString() throws Exception {
+		// todo: richer toString? i.e. running or not, command, args, etc.
+		assertThat(Jash.start("java", "-version").toString())
+																.isEqualTo("java -version");
+
+		assertThat(Jash.$("java -version").toString())
+														.endsWith("sh -c java -version");
+
+	}
+
+	@Test
 	public void testSuccessful() throws Exception {
 		assertThat(Jash	.start("sh", "-c", "echo hello world")
 						.isSuccessful())
