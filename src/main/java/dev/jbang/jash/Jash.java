@@ -80,7 +80,7 @@ public class Jash implements AutoCloseable {
 			return comSpec;
 		}
 
-		// TODO: should we check user’s login shell via /etc/passwd (UNIX) ??
+		// TODO: should we check user's login shell via /etc/passwd (UNIX) ??
 
 		// Step 4: OS default
 		if (isMac())
@@ -917,24 +917,28 @@ public class Jash implements AutoCloseable {
 
 	@Override
 	public String toString() {
-		return processBuilder	.command()
+		return String.format("Jash[command=%s, shell=%s, timeout=%s, closeAfterLast=%b, isAlive=%b]",
+				processBuilder	.command()
 								.stream()
-								.map(this::quoteArg)
-								.collect(Collectors.joining(" "));
+								.collect(Collectors.joining(",")),
+				shell,
+				timeout,
+				closeAfterLast,
+				process.isAlive());
 	}
 
-	private static final String UNQUOTED_CHARACTERS = "|&;<>()$`\\\"' \t\n*?[#˜=%";
-	private static final Character ESCAPE_CHARACTER = '\\';
-
-	private String quoteArg(String arg) {
-		if (UNQUOTED_CHARACTERS.chars().mapToObj(c -> (char) c).anyMatch(c -> arg.indexOf(c) >= 0)) {
-			return UNQUOTED_CHARACTERS	.chars()
-										.mapToObj(c -> String.valueOf((char) c))
-										.reduce(arg, (c, escapedArg) -> escapedArg.replace(c, ESCAPE_CHARACTER + c),
-												(u, v) -> v);
-		}
-		return arg;
-	}
+	/*
+	 * TODO: not seeing why quoteArg is needed in toString... for now it cuts off
+	 * the arguments for me private static final String UNQUOTED_CHARACTERS =
+	 * "|&;<>()$`\\\"' \t\n*?[#˜=%"; private static final Character ESCAPE_CHARACTER
+	 * = '\\';
+	 * 
+	 * private String quoteArg(String arg) { if
+	 * (UNQUOTED_CHARACTERS.chars().mapToObj(c -> (char) c).anyMatch(c ->
+	 * arg.indexOf(c) >= 0)) { return UNQUOTED_CHARACTERS.chars() .mapToObj(c ->
+	 * String.valueOf((char) c)) .reduce(arg, (c, escapedArg) ->
+	 * escapedArg.replace(c, ESCAPE_CHARACTER + c), (u, v) -> v); } return arg; }
+	 */
 
 	CustomProcess getProcess() {
 		return process;
