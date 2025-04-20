@@ -1,11 +1,13 @@
 # jash
 
+![Maven Central Version](https://img.shields.io/maven-central/v/dev.jbang/jash)
+
+
 ## Table of content
 
 * [What is it?](#what-is-it)
 * [How to use it](#how-to-use-it)
 * [How to build](#how-to-build)
-* [Maven Profiles](#maven-profiles)
 * [Origin story](#origin-story)
 
 ## What is it?
@@ -28,7 +30,40 @@ A Java library to provide a Process interface that is fluent, predictable and wi
 
 ## How to use it
 
-Just use one of `Jash.start(String command, String...args)` or `Jash.builder(String command, String args...args)` for a more fine grained configuration:
+Add the ![Maven Central Version](https://img.shields.io/maven-central/v/dev.jbang/jash) dependency to your project:
+
+<details>
+<summary>JBang</summary>
+
+```java
+//DEPS dev.jbang:jash:RELEASE
+```
+</details>
+
+<details>
+<summary>Maven</summary>
+
+```xml
+<dependency>
+    <groupId>dev.jbang</groupId>
+    <artifactId>jash</artifactId>
+    <version>RELEASE</version>
+</dependency>
+```
+</details>
+
+<details>
+<summary>Gradle</summary>
+
+```groovy
+dependencies {
+    implementation 'dev.jbang:jash:RELEASE'
+}
+```
+</details>
+
+
+Then use one of `Jash.start(String command, String...args)` or `Jash.builder(String command, String args...args)` for a more fine grained configuration:
 
 * Will stream `Stream.of("hello", "world")`:
 
