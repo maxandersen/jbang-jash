@@ -89,10 +89,10 @@ public class JashIT {
 	public void testJashToString() throws Exception {
 		// todo: richer toString? i.e. running or not, command, args, etc.
 		assertThat(Jash.start("java", "-version").toString())
-																.isEqualTo("java -version");
+																.contains("command=java,-version");
 
 		assertThat(Jash.$("java -version").toString())
-														.endsWith("sh -c java -version");
+														.contains("sh,-c,java -version");
 
 	}
 
